@@ -27,6 +27,8 @@ function loadThree() {
 }
 
 const TOKEN="9QLCEL7Xo9VTwgBeAYU1PWX7JJ8joKxQCYw3msjUpump";
+const POOL="4155gZUL9omQeB8zyaTrEtxAGqzj1Bmn7szxX2n7tMii";
+const CHART="https://www.geckoterminal.com/ru/solana/pools/"+POOL;
 const PUMP="https://pump.fun/coin/"+TOKEN;
 let audioCtx=null, currentSeason=1, micStream=null;
 
@@ -317,8 +319,8 @@ async function requestCamera(){
   }catch(error){stopCamera();alert('Camera access was denied or is unavailable.');}
 }
 async function tokenPanel(){
- show(`<h2>🪙 $CICADAFARM</h2><p class="muted">Solana · CicadaFarm ecosystem token</p><div class="grid"><div class="tile"><b id="price">—</b><small>price USD</small></div><div class="tile"><b id="mcap">—</b><small>market cap</small></div><div class="tile"><b id="liq">—</b><small>liquidity</small></div></div>
-<p class="token-address">Contract address (from project source)<br><code>${TOKEN}</code></p><p class="muted">CicadaFarm and <a href="https://robotcyb.ai/" target="_blank" rel="noopener">Robotcyb</a> are one project. Trading data appears only when an indexed market exists.</p><div class="actions"><button onclick="navigator.clipboard.writeText(TOKEN).then(()=>{this.textContent='COPIED'}).catch(()=>{this.textContent='SELECT ADDRESS ABOVE'})">COPY ADDRESS</button><button onclick="window.open('${PUMP}','_blank')">BUY ON PUMP.FUN</button><button onclick="window.open('https://dexscreener.com/solana/${TOKEN}','_blank')">OPEN CHART</button></div><p id="tokenStatus" class="muted" role="status">Loading market data…</p>`);
+ show(`<h2>🪙 $CICADAFARM</h2><p class="muted">Solana · CicadaFarm ecosystem token</p><div class="grid"><div class="tile"><b id="price">—</b><small>price USD</small></div><div class="tile"><b id="mcap">—</b><small>market cap (verified)</small></div><div class="tile"><b id="liq">—</b><small>pool liquidity</small></div><div class="tile"><b id="fdv">—</b><small>fully diluted valuation (FDV)</small></div></div>
+<p class="token-address">Contract address (from project source)<br><code>${TOKEN}</code></p><p class="muted">CicadaFarm and <a href="https://robotcyb.ai/" target="_blank" rel="noopener">Robotcyb</a> are one project. Live pool data from GeckoTerminal · PumpSwap. FDV is shown separately from verified market cap.</p><div class="actions"><button onclick="navigator.clipboard.writeText(TOKEN).then(()=>{this.textContent='COPIED'}).catch(()=>{this.textContent='SELECT ADDRESS ABOVE'})">COPY ADDRESS</button><button onclick="window.open('${PUMP}','_blank')">BUY ON PUMP.FUN</button><button onclick="window.open('${CHART}','_blank','noopener')">OPEN CHART</button></div><p id="tokenStatus" class="muted" role="status">Loading market data…</p>`);
  fetchToken();
 }
 let tokenController=null;
@@ -330,18 +332,16 @@ async function fetchToken(){
   const timeout=setTimeout(()=>controller.abort(),8000);
   const status=document.getElementById('tokenStatus');
   try{
-    const response=await fetch('https://api.dexscreener.com/latest/dex/tokens/'+TOKEN,{signal:controller.signal});
+    const response=await fetch('https://api.geckoterminal.com/api/v2/networks/solana/pools/'+POOL,{signal:controller.signal,headers:{Accept:'application/json'}});
     if(!response.ok)throw new Error('Market API unavailable');
-    const data=await response.json();
-    const pairs=Array.isArray(data.pairs)?data.pairs.filter(p=>p && p.chainId==='solana' && p.baseToken?.address===TOKEN && Number.isFinite(Number(p.priceUsd)) && Number(p.priceUsd)>0):[];
-    if(!pairs.length){status.textContent='DexScreener has no indexed trading pair for this address yet. Price, market cap and liquidity are not available. Check the token directly on Pump.fun.';return;}
-    const pair=pairs.sort((a,b)=>(Number(b.liquidity?.usd)||0)-(Number(a.liquidity?.usd)||0))[0];
+    const metrics=FarmRuntime.parsePool(await response.json(),POOL,TOKEN);
     if(!price.isConnected || controller.signal.aborted)return;
-    price.textContent='$'+Number(pair.priceUsd).toFixed(8);
-    const currency=value=>Number.isFinite(Number(value)) && Number(value)>0?'$'+Math.round(Number(value)).toLocaleString():'—';
-    document.getElementById('mcap').textContent=currency(pair.marketCap);
-    document.getElementById('liq').textContent=currency(pair.liquidity?.usd);
-    status.textContent='DexScreener · updated '+new Date().toLocaleTimeString();
+    const currency=value=>value===null?'Not available':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(value);
+    price.textContent=metrics.price===null?'Not available':new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumSignificantDigits:7}).format(metrics.price);
+    document.getElementById('mcap').textContent=currency(metrics.marketCap);
+    document.getElementById('fdv').textContent=currency(metrics.fdv);
+    document.getElementById('liq').textContent=currency(metrics.liquidity);
+    status.textContent='GeckoTerminal · updated '+new Date().toLocaleTimeString()+(metrics.marketCap===null?' · Verified market cap is not supplied by the API; FDV is a separate estimate.':'');
   }catch(error){if(price.isConnected)status.textContent='Market service could not be reached. Use the contract address and direct links; try again later.';}
   finally{clearTimeout(timeout);if(tokenController===controller)tokenController=null;}
 }
@@ -399,7 +399,7 @@ function applySeason(){
 applySeason();
 let weatherTimer=null,tokenTimer=null;
 function startFarmTimers(){if(weatherTimer!==null || !farmEntered || document.hidden)return;weatherTimer=setInterval(()=>{document.getElementById("temp").textContent=(currentSeason===3?(-8+Math.floor(Math.random()*8)):18+Math.floor(Math.random()*12))+"°"},5000);
-tokenTimer=setInterval(fetchToken,30000);}
+tokenTimer=setInterval(fetchToken,60000);}
 function stopFarmTimers(){clearInterval(weatherTimer);clearInterval(tokenTimer);weatherTimer=tokenTimer=null;abortTokenRequest();}
 
 /* One autonomous flying Robotcyb: patrols the actual farm rooms and checks on the animals. */

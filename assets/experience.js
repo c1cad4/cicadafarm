@@ -31,7 +31,7 @@ const RobotMind={engine:null,worker:null,busy:false,history:[],epoch:0,
  },
  guide(q){
   const ru=/[а-яё]/i.test(q);let text;
-  if(/token|токен|цена|price|contract/i.test(q))text=ru?'Токен CicadaFarm в сети Solana. Адрес: 9QLCEL7Xo9VTwgBeAYU1PWX7JJ8joKxQCYw3msjUpump. Открой TOKEN для контракта и ссылок. Если торговая пара не индексируется, цена неизвестна.':'Open TOKEN for the Solana contract and direct market links. An unindexed market has no available price.';
+  if(/token|токен|цена|price|contract/i.test(q))text=ru?'Токен CicadaFarm в сети Solana. Адрес: 9QLCEL7Xo9VTwgBeAYU1PWX7JJ8joKxQCYw3msjUpump. Открой TOKEN для контракта и ссылок. Цена и ликвидность берутся из GeckoTerminal. Если market cap не подтверждён, показана отдельно FDV.':'Open TOKEN for the Solana contract and direct market links. Live price and liquidity come from GeckoTerminal. Verified market cap may be unavailable; FDV is separate.';
   else if(/bee|hive|honey|пчел|пчёл|улей|м[её]д/i.test(q))text=ru?'В Bee Land показаны 12 ульев. Раздел HIVES описывает аренду на один или два года; бронирование и оплата пока не подключены.':'Bee Land shows 12 hives. HIVES describes one- and two-year rentals; booking and payments are not connected.';
   else if(/camera|video|камер|видео/i.test(q))text=ru?'CAMERAS открывает предпросмотр камеры твоего устройства после разрешения. Камеры самой фермы пока не подключены.':'CAMERAS previews your device camera after permission. Farm camera streams are not connected yet.';
   else if(/season|сезон|зим|лет|весн|осен/i.test(q))text=ru?'Кнопка change season переключает весну, лето, осень и зиму. SOUND включает атмосферу сезона.':'Use change season to switch spring, summer, autumn and winter. SOUND controls seasonal ambience.';
@@ -50,11 +50,19 @@ function startSeasonSound(){
  for(let i=0;i<data.length;i++){soft=(soft+Math.random()*0.08-0.04)*.98;data[i]=soft;}
  const noise=ctx.createBufferSource();noise.buffer=buffer;noise.loop=true;
  const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=[1800,850,1100,400][currentSeason];
- const gain=ctx.createGain();gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime([.2,.1,.24,.3][currentSeason],now+1.5);
+ const gain=ctx.createGain();gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime([.10,.05,.12,.15][currentSeason],now+1.5);
  noise.connect(filter).connect(gain).connect(ctx.destination);noise.start();
- const pulse=ctx.createOscillator(),depth=ctx.createGain();pulse.frequency.value=[.24,.12,.18,.08][currentSeason];depth.gain.value=.025;pulse.connect(depth).connect(gain.gain);pulse.start();
+ const pulse=ctx.createOscillator(),depth=ctx.createGain();pulse.frequency.value=[.24,.12,.18,.08][currentSeason];depth.gain.value=.012;pulse.connect(depth).connect(gain.gain);pulse.start();
  ambienceNodes.push(noise,filter,gain,pulse,depth);
- if(currentSeason===0||currentSeason===1){const bird=ctx.createOscillator(),birdGain=ctx.createGain(),lfo=ctx.createOscillator(),sweep=ctx.createGain();bird.frequency.value=currentSeason===0?1800:3200;lfo.frequency.value=currentSeason===0?2.3:8;sweep.gain.value=180;birdGain.gain.value=.002;lfo.connect(sweep).connect(bird.frequency);bird.connect(birdGain).connect(ctx.destination);bird.start();lfo.start();ambienceNodes.push(bird,birdGain,lfo,sweep);}
+ // A quiet suspended chord, softly detuned like distant orbiting signals.
+ const padGain=ctx.createGain(),padFilter=ctx.createBiquadFilter();padFilter.type='lowpass';padFilter.frequency.value=550;
+ padGain.gain.setValueAtTime(0,now);padGain.gain.linearRampToValueAtTime(.012,now+3);
+ padFilter.connect(padGain).connect(ctx.destination);
+ const notes=[[130.81,196,293.66],[110,164.81,246.94],[98,146.83,220],[87.31,130.81,196]][currentSeason];
+ notes.forEach((frequency,i)=>{const tone=ctx.createOscillator();tone.type='sine';tone.frequency.value=frequency;tone.detune.value=(i-1)*4;tone.connect(padFilter);tone.start();ambienceNodes.push(tone);});
+ const orbit=ctx.createOscillator(),orbitDepth=ctx.createGain();orbit.frequency.value=.065;orbitDepth.gain.value=.003;orbit.connect(orbitDepth).connect(padGain.gain);orbit.start();ambienceNodes.push(padGain,padFilter,orbit,orbitDepth);
+
+ if(currentSeason===0||currentSeason===1){const bird=ctx.createOscillator(),birdGain=ctx.createGain(),lfo=ctx.createOscillator(),sweep=ctx.createGain();bird.frequency.value=currentSeason===0?1800:3200;lfo.frequency.value=currentSeason===0?2.3:8;sweep.gain.value=180;birdGain.gain.value=.001;lfo.connect(sweep).connect(bird.frequency);bird.connect(birdGain).connect(ctx.destination);bird.start();lfo.start();ambienceNodes.push(bird,birdGain,lfo,sweep);}
 }
 function openRobotPortal(event){
  if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;

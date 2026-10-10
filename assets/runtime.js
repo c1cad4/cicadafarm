@@ -57,7 +57,23 @@
     };
   }
 
-  const api = { createStore, readArray, createFrameLoop };
+  function parsePool(data, poolAddress, tokenAddress) {
+    const pool = data?.data;
+    if (pool?.id !== 'solana_' + poolAddress || pool?.attributes?.address !== poolAddress ||
+        pool?.relationships?.base_token?.data?.id !== 'solana_' + tokenAddress) {
+      throw new Error('Unexpected pool or token');
+    }
+    const number = value => {
+      if (value === null || value === undefined || value === '') return null;
+      const n = Number(value);
+      return Number.isFinite(n) && n >= 0 ? n : null;
+    };
+    const a = pool.attributes;
+    return { price: number(a.base_token_price_usd), marketCap: number(a.market_cap_usd),
+      liquidity: number(a.reserve_in_usd), fdv: number(a.fdv_usd) };
+  }
+
+  const api = { createStore, readArray, createFrameLoop, parsePool };
   if (typeof module !== 'undefined') module.exports = api;
   else root.FarmRuntime = api;
 })(globalThis);

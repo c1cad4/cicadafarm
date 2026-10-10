@@ -44,4 +44,6 @@ The header portal connects this farm to https://robotcyb.ai/ with a short transi
 
 Robotcyb has a Russian/English project guide plus optional browser inference using WebLLM 0.2.85 and SmolLM2 135M (q0f16). The model downloads from Hugging Face only on LOAD SMALL AI, approximately 300 MB, and requires WebGPU plus sufficient GPU memory. Computation runs in a module worker; STOP AI terminates it. Small-model answers are fallible and English works best. Conversation stays on-device; model/runtime downloads contact jsDelivr, Hugging Face and MLC's model library host. No API key or paid server is needed.
 
-The token address comes from the supplied project source. Market metrics are shown only for matching Solana pairs returned by DexScreener; no indexed pair means unavailable data, not a fabricated zero price. The contract and direct links remain visible.
+The token address comes from the supplied project source. Market metrics are shown only for the matching Solana pool returned by GeckoTerminal for the configured PumpSwap pool; missing fields mean unavailable data, not a fabricated zero price. The contract and direct links remain visible.
+
+Token metrics refresh once per minute while the panel is open. Verified market cap and FDV remain separate; API null values are never displayed as zero. Seasonal ambience includes a quiet orbital pad with season-specific notes, layered below wind/rain textures.
