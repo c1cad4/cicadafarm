@@ -55,3 +55,7 @@ Robotcyb and CicadaFarm use the same portal renderer and local AI runtime. Autom
 ## CicadaFarm: Swarm
 
 `play/` is a free, standalone canvas game with EN/RU/Chinese UI, pointer and keyboard controls, three-minute rounds, weather, computer-controlled bots and local progress. No wallet connection, payments, multiplayer or redeemable rewards are enabled. Local scores are not trusted for future paid entitlements or public rankings.
+
+## Shared Garden multiplayer beta
+
+`play/online.html` connects to the separate `multiplayer/` Cloudflare Worker and SQLite-backed Durable Object. Twenty numbered rooms hold up to twelve players each. The server owns movement, harvesting and scores; clients send targets only. Rooms use 10 Hz snapshots, bounded input size/rate and a 30-second reconnect window while the instance remains active. No permanent player accounts, cross-restart recovery, purchases or global rankings. Nicknames are public to room participants; no chat or wallet connection. Active simulations consume Durable Object duration quota. Idle rooms stop their timer. Deploy the Worker from `multiplayer/` using `npx wrangler deploy`.
