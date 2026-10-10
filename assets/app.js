@@ -233,7 +233,8 @@ function cybChatPanel(){
 
 function solarPanel(){show(`<h2>☀️ SOLAR CORE</h2><p class="muted">Energy layer of the CicadaFarm digital twin.</p><div class="grid"><div class="tile"><b class="metric">87%</b><small>battery</small></div><div class="tile"><b class="metric">3.2 kW</b><small>demo load</small></div><div class="tile"><b class="metric">ONLINE</b><small>controller</small></div><div class="tile"><b class="metric">AUTO</b><small>energy mode</small></div></div><div class="cyberbar"><span><span class="pulse"></span> SOLAR CORE ONLINE</span><span class="kicker">PHYSICAL ENERGY ↔ DIGITAL TWIN</span></div><p>Solar generation, battery state and farm loads are shown here as a cyber layer. Real inverter/MPPT telemetry can be connected later.</p><div class="actions"><button class="primary" onclick="openPanel('network')">OPEN NETWORK</button><button onclick="robotSpeech('Solar Core is online. Energy layer is ready for real telemetry.')">ASK ROBOTCYB</button></div>`)}
 function openPanel(which){
- if(which==="cybchat") cybChatPanel();
+ if(which==="impact") impactPanel();
+ else if(which==="cybchat") cybChatPanel();
  else if(which==="solar") solarPanel();
  else if(which==="token") tokenPanel();
  else if(which==="knowledge") knowledgePanel();
