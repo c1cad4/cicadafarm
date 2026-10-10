@@ -2,3 +2,6 @@
 node_modules/
 work/
 *.log
+
+node_modules/
+.wrangler/
