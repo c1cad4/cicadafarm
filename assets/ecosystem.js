@@ -50,7 +50,7 @@
   reset();const url=new URL(location.href);
   if(url.searchParams.has('from')){
    const from=url.searchParams.get('from');if(from!=='robotcyb'&&from!=='cicadafarm')return;
-   url.searchParams.delete('from');history.replaceState(null,'',url);
+   url.searchParams.delete('from');url.searchParams.delete('portalv');history.replaceState(null,'',url);
    if(!reduced){journey(from==='robotcyb'?'CICADAFARM':'ROBOTCYB',true);navigation=setTimeout(reset,950);}
   }
  });
