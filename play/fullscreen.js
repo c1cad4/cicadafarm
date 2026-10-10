@@ -38,7 +38,7 @@
   document.getElementById('start').addEventListener('click', enter);
   document.addEventListener('fullscreenchange', sync);
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && arena.classList.contains('expanded')) exit();
+    if (e.key === 'Escape' && active()) exit();
   });
   new MutationObserver(sync).observe(document.documentElement, {attributes: true, attributeFilter: ['lang']});
   sync();
