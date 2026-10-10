@@ -8,6 +8,7 @@
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/cicada-logo-256.png">
 <script defer src="assets/runtime.js"></script>
+<script defer src="assets/experience.js"></script>
 <script defer src="assets/app.js"></script>
 <title>CicadaFarm — Living Farm</title>
 <link rel="stylesheet" href="assets/site.css">
@@ -33,7 +34,7 @@
 <div class="ui">
 <header class="topbar">
   <a class="brand" href="./" aria-label="CicadaFarm home"><img src="assets/cicada-logo-256.png" alt="" width="42" height="42"><span><b>CICADAFARM</b><small>living farm • explore • participate</small></span></a>
-</header>
+<a class="robot-portal" href="https://robotcyb.ai/" onclick="openRobotPortal(event)"><span class="portal-ring">✧</span><span>ROBOTCYB<small>one ecosystem · enter portal ↗</small></span></a></header>
 
 <!-- Orbital navigation: the interface is a constellation, not a toolbar. -->
 <nav class="orbital-nav" aria-label="CicadaFarm navigation">
@@ -102,12 +103,13 @@
  <div class="card">
    <button class="close" aria-label="Close" onclick="toggleRobot()">×</button>
    <b style="color:#7dffbd">ROBOTCYB</b>
-   <div id="robotMsg" style="margin-top:8px;font-size:11px">I am the CicadaFarm agent. Ask me about the farm, recipes or knowledge. I can joke too — sometimes successfully.</div>
-   <input id="robotInput" placeholder="Ask ROBOTCYB..." onkeydown="if(event.key==='Enter')askRobot()">
+   <div id="robotMsg" style="margin-top:8px;font-size:11px">I am Robotcyb, your farm companion. Ask about the farm in English or Russian. Load the small AI for open conversation (English works best). The model downloads only when you choose.</div>
+   <div class="ai-tools"><button id="loadAI" onclick="RobotMind.load()">LOAD SMALL AI (~300 MB)</button><button onclick="RobotMind.stop()">STOP AI</button><small id="aiStatus" role="status">Project guide · optional local AI · WebGPU required</small></div><input id="robotInput" placeholder="Ask ROBOTCYB..." onkeydown="if(event.key==='Enter')askRobot()">
    <button class="primary" onclick="askRobot()">ASK</button>
  </div>
 </div>
 
+<div id="portalTransition" aria-hidden="true"><span>ROBOTCYB</span><small>same ecosystem · another dimension</small></div>
 <div id="panel" class="panel" role="dialog" aria-modal="true" aria-label="Farm details" onclick="if(event.target===this)closePanel()">
  <div class="panelbox"><button class="close" aria-label="Close" onclick="closePanel()">×</button><div id="content"></div></div>
 </div>

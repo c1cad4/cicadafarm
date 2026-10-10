@@ -157,11 +157,16 @@ function startEntryTone(){
     g.gain.exponentialRampToValueAtTime(.028,audioCtx.currentTime+.12);
     g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+1.25);
     o.connect(g).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+1.3);
+    const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate),samples=buf.getChannelData(0);let v=0;
+    for(let i=0;i<samples.length;i++){v=(v+Math.random()*.1-.05)*.98;samples[i]=v;}
+    const n=audioCtx.createBufferSource(),f=audioCtx.createBiquadFilter(),ng=audioCtx.createGain();n.buffer=buf;f.type='lowpass';f.frequency.setValueAtTime(200,audioCtx.currentTime);f.frequency.exponentialRampToValueAtTime(2400,audioCtx.currentTime+1);ng.gain.setValueAtTime(.0001,audioCtx.currentTime);
+    for(let i=0;i<4;i++){ng.gain.exponentialRampToValueAtTime(.14,audioCtx.currentTime+i*.4+.12);ng.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+i*.4+.38);}
+    n.connect(f).connect(ng).connect(audioCtx.destination);n.start();n.stop(audioCtx.currentTime+1.8);
   }catch(e){}
 }
 function enterFarm(){
   if(farmEntered)return;
-  farmEntered=true; softEntryVibration(); if(soundEnabled)startEntryTone();
+  farmEntered=true; softEntryVibration(); soundEnabled=true; document.getElementById("soundToggle").textContent="🔊 SOUND ON"; startEntryTone(); startSeasonSound();
   stopEntryTwin(); document.body.classList.add('farm-entered');
   document.getElementById('space').classList.add('fly');
   setTimeout(()=>{document.getElementById('space').hidden=true;},700);
@@ -208,7 +213,7 @@ function cybChatSend(){
  else if(text==='/who'){cybChatState.messages.push({from:'CYBCHAT',text:'FARM NODE, ROBOTCYB, BEE LAND, GARDEN NODE — '+(cybChatState.mesh?'mesh link active':'local nodes visible'),transport:'COMMAND',ts:Date.now()});}
  else if(text==='/mesh'){cybChatState.mesh=!cybChatState.mesh;cybChatState.messages.push({from:'CYBCHAT',text:cybChatState.mesh?'Mesh session armed. Bluetooth transport requires the native CybChat layer.':'Mesh session paused.',transport:'COMMAND',ts:Date.now()});}
  else if(text==='/clear'){cybChatState.messages=[];cybChatSave();cybChatRender();input.value='';return;}
- else {cybChatState.messages.push({from:'YOU',text,me:true,transport:cybChatState.mesh?'MESH SIMULATION':'LOCAL',ts:Date.now()});setTimeout(()=>{cybChatState.messages.push({from:cybChatState.peer,text:'Message received by the farm chat UI. Native Bluetooth/Nostr delivery is not claimed in this browser build.',transport:cybChatState.mesh?'MESH UI':'LOCAL',ts:Date.now()});cybChatSave();cybChatRender();},420);}
+ else {cybChatState.messages.push({from:'YOU',text,me:true,transport:cybChatState.mesh?'MESH SIMULATION':'LOCAL',ts:Date.now()});setTimeout(async ()=>{cybChatState.messages.push({from:'ROBOTCYB',text:await RobotMind.reply(text),transport:cybChatState.mesh?'MESH UI':'LOCAL',ts:Date.now()});cybChatSave();cybChatRender();},420);}
  cybChatSave();cybChatRender();input.value='';
 }
 function cybChatPeer(name){cybChatState.peer=name;document.querySelectorAll('.cybchat-peer').forEach(x=>x.classList.toggle('active',x.dataset.peer===name));const t=document.getElementById('cybchatPeer');if(t)t.textContent=name;}
@@ -312,8 +317,8 @@ async function requestCamera(){
   }catch(error){stopCamera();alert('Camera access was denied or is unavailable.');}
 }
 async function tokenPanel(){
- show(`<h2>🪙 $CICADAFARM</h2><p class="muted">Solana token • market data when available</p><div class="grid"><div class="tile"><b id="price">—</b><small>price USD</small></div><div class="tile"><b id="mcap">—</b><small>market cap</small></div><div class="tile"><b id="liq">—</b><small>liquidity</small></div></div>
-<div class="actions"><button onclick="window.open('${PUMP}','_blank')">BUY ON PUMP.FUN</button><button onclick="window.open('https://dexscreener.com/solana/${TOKEN}','_blank')">OPEN CHART</button></div><p id="tokenStatus" class="muted" role="status">Loading market data…</p>`);
+ show(`<h2>🪙 $CICADAFARM</h2><p class="muted">Solana · CicadaFarm ecosystem token</p><div class="grid"><div class="tile"><b id="price">—</b><small>price USD</small></div><div class="tile"><b id="mcap">—</b><small>market cap</small></div><div class="tile"><b id="liq">—</b><small>liquidity</small></div></div>
+<p class="token-address">Contract address (from project source)<br><code>${TOKEN}</code></p><p class="muted">CicadaFarm and <a href="https://robotcyb.ai/" target="_blank" rel="noopener">Robotcyb</a> are one project. Trading data appears only when an indexed market exists.</p><div class="actions"><button onclick="navigator.clipboard.writeText(TOKEN).then(()=>{this.textContent='COPIED'}).catch(()=>{this.textContent='SELECT ADDRESS ABOVE'})">COPY ADDRESS</button><button onclick="window.open('${PUMP}','_blank')">BUY ON PUMP.FUN</button><button onclick="window.open('https://dexscreener.com/solana/${TOKEN}','_blank')">OPEN CHART</button></div><p id="tokenStatus" class="muted" role="status">Loading market data…</p>`);
  fetchToken();
 }
 let tokenController=null;
@@ -329,7 +334,7 @@ async function fetchToken(){
     if(!response.ok)throw new Error('Market API unavailable');
     const data=await response.json();
     const pairs=Array.isArray(data.pairs)?data.pairs.filter(p=>p && p.chainId==='solana' && p.baseToken?.address===TOKEN && Number.isFinite(Number(p.priceUsd)) && Number(p.priceUsd)>0):[];
-    if(!pairs.length)throw new Error('No matching market is available yet');
+    if(!pairs.length){status.textContent='DexScreener has no indexed trading pair for this address yet. Price, market cap and liquidity are not available. Check the token directly on Pump.fun.';return;}
     const pair=pairs.sort((a,b)=>(Number(b.liquidity?.usd)||0)-(Number(a.liquidity?.usd)||0))[0];
     if(!price.isConnected || controller.signal.aborted)return;
     price.textContent='$'+Number(pair.priceUsd).toFixed(8);
@@ -337,12 +342,12 @@ async function fetchToken(){
     document.getElementById('mcap').textContent=currency(pair.marketCap);
     document.getElementById('liq').textContent=currency(pair.liquidity?.usd);
     status.textContent='DexScreener · updated '+new Date().toLocaleTimeString();
-  }catch(error){if(price.isConnected)status.textContent='Market data unavailable. The farm remains ready to explore.';}
+  }catch(error){if(price.isConnected)status.textContent='Market service could not be reached. Use the contract address and direct links; try again later.';}
   finally{clearTimeout(timeout);if(tokenController===controller)tokenController=null;}
 }
 
 function toggleRobot(){const r=document.getElementById("robotPanel");r.style.display=r.style.display==="block"?"none":"block";}
-function askRobot(){const q=document.getElementById('robotInput').value.trim().toLowerCase();if(!q)return;let a='Start with Bee Land, the garden or the knowledge archive. I am a local farm guide with preset replies.';if(q.includes('recipe'))a='You can keep ingredients and preparation steps in the Knowledge Archive, then return to them later.';else if(q.includes('hive')||q.includes('honey'))a='The hive panel describes the planned one- and two-year rental options. Reservations and payment are not connected yet.';else if(q.includes('camera')||q.includes('video'))a='The camera hub can preview your device camera. Real farm cameras will need a separate connection.';document.getElementById('robotMsg').textContent=a;document.getElementById('robotInput').value='';}
+async function askRobot(){const input=document.getElementById('robotInput'),q=input.value.trim();if(!q || RobotMind.busy)return;input.value='';const box=document.getElementById('robotMsg');box.textContent='Robotcyb is thinking…';box.textContent=await RobotMind.reply(q);}
 
 /* Living farm simulation: grass regrows, animals move inside their own rooms, fish swim in the lake. */
 function seedGrass(){
@@ -389,7 +394,7 @@ function applySeason(){
  if(s.snow){for(let i=0;i<55;i++){const e=document.createElement("i");e.className="snowflake";e.textContent="❄";e.style.left=Math.random()*100+"%";e.style.animationDelay=Math.random()*7+"s";fx.appendChild(e)}}
  if(s.leaves){for(let i=0;i<28;i++){const e=document.createElement("i");e.className="leaf";e.textContent=["🍂","🍁","🍃"][i%3];e.style.left=Math.random()*100+"%";e.style.animationDelay=Math.random()*5+"s";fx.appendChild(e)}}
  document.querySelectorAll(".flower").forEach(x=>x.style.display=currentSeason===3?"none":"block");
- document.querySelector(".harvest").style.display=currentSeason===2?"block":"none";
+ document.querySelector(".harvest").style.display=currentSeason===2?"block":"none"; if(farmEntered)startSeasonSound();
 }
 applySeason();
 let weatherTimer=null,tokenTimer=null;
@@ -417,7 +422,7 @@ function startRobotPatrol(){if(robotTimer!==null || document.hidden || !farmEnte
 function toggleFarmSound(){
   soundEnabled=!soundEnabled;
   document.getElementById("soundToggle").textContent=soundEnabled?"🔊 SOUND ON":"🔇 SOUND OFF";
-  if(soundEnabled){ensureFarmAudio(); robotSpeech("Audio restored. The farm is alive again.");}
+  if(soundEnabled){ensureFarmAudio();startSeasonSound();}else{stopSeasonSound();audioCtx?.suspend().catch(()=>{});}
 }
 const oldEnterFarm=enterFarm;
 enterFarm=function(){
@@ -436,7 +441,7 @@ function pauseFarm(){
 function resumeFarm(){
   document.body.classList.toggle('tab-hidden',document.hidden);
   if(document.hidden){pauseFarm();return;}
-  if(farmEntered){startFarmTimers();if(!reducedMotion)startRobotPatrol();fetchToken();}
+  if(farmEntered){if(soundEnabled){ensureFarmAudio();startSeasonSound();}startFarmTimers();if(!reducedMotion)startRobotPatrol();fetchToken();}
   else if(entryTwin)entryTwin.loop.start();else initEntryPixelTwin();
 }
 document.addEventListener('visibilitychange',resumeFarm);

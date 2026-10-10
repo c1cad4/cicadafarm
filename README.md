@@ -38,3 +38,10 @@ The farm values, sensor states, chat responses and camera-hub labels are demonst
 ## Hosting
 
 Serve this repository as a static site. All assets use relative paths, including when hosted at `/cicadafarm/`. For GitHub Pages, select the `main` branch and root directory in **Settings → Pages**. The `.nojekyll` file keeps these static assets unchanged. The expected Pages URL is https://c1cad4.github.io/cicadafarm/ once Pages is enabled and deployment completes.
+
+### Robotcyb experience
+The header portal connects this farm to https://robotcyb.ai/ with a short transition (skipped for reduced motion). Entering the farm enables a quiet synthesized cosmic sound and seasonal ambience; SOUND turns all audio off. Hidden tabs suspend audio.
+
+Robotcyb has a Russian/English project guide plus optional browser inference using WebLLM 0.2.85 and SmolLM2 135M (q0f16). The model downloads from Hugging Face only on LOAD SMALL AI, approximately 300 MB, and requires WebGPU plus sufficient GPU memory. Computation runs in a module worker; STOP AI terminates it. Small-model answers are fallible and English works best. Conversation stays on-device; model/runtime downloads contact jsDelivr, Hugging Face and MLC's model library host. No API key or paid server is needed.
+
+The token address comes from the supplied project source. Market metrics are shown only for matching Solana pairs returned by DexScreener; no indexed pair means unavailable data, not a fabricated zero price. The contract and direct links remain visible.
