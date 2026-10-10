@@ -47,3 +47,5 @@ Robotcyb has a Russian/English project guide plus optional browser inference usi
 The token address comes from the supplied project source. Market metrics are shown only for the matching Solana pool returned by GeckoTerminal for the configured PumpSwap pool; missing fields mean unavailable data, not a fabricated zero price. The contract and direct links remain visible.
 
 Token metrics refresh once per minute while the panel is open. Verified market cap and FDV remain separate; API null values are never displayed as zero. Seasonal ambience includes a quiet orbital pad with season-specific notes, layered below wind/rain textures.
+
+Ambient modulation uses slow 18–40 second cycles, softened upper frequencies, a six-second chord fade-in and 1.8-second crossfades between seasons.
