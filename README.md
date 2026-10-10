@@ -54,7 +54,7 @@ Robotcyb and CicadaFarm use the same portal renderer and local AI runtime. Autom
 
 ## CicadaFarm: Swarm
 
-`play/` is a free, standalone canvas game with EN/RU/Chinese UI, pointer and keyboard controls, three-minute rounds, weather, computer-controlled bots and local progress. No wallet connection, payments, multiplayer or redeemable rewards are enabled. Local scores are not trusted for future paid entitlements or public rankings.
+`play/` is a free, standalone canvas game with EN/RU/Chinese UI, pointer and keyboard controls, three-minute rounds, weather, computer-controlled bots and local progress. The solo mode has no wallet connection, payments or redeemable rewards. The separate multiplayer mode is linked from the header. Local scores are not trusted for future paid entitlements or public rankings.
 
 ## Shared Garden multiplayer beta
 
