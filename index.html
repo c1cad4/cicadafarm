@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Explore CicadaFarm: a living pixel farm with animals, hives, seasons, a knowledge archive and a local farm market.">
+<meta name="theme-color" content="#020504">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/cicada-logo-256.png">
+<script defer src="assets/runtime.js"></script>
+<script defer src="assets/app.js"></script>
+<title>CicadaFarm — Living Farm</title>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<div class="app">
+<div id="sky"><div id="stars"></div><div id="seasonFX" class="season-sky season-summer"></div><div id="weatherFX"></div></div>
+
+<section id="space">
+  <div id="entryPixelTwin" aria-label="CicadaFarm physical farm digital twin visualization">
+    <img class="entry-fallback" src="assets/cicada-logo-256.png" width="256" height="256" alt="CicadaFarm emblem">
+  </div>
+  <button class="enter" onclick="enterFarm()">ENTER CICADAFARM</button>
+  <div class="space-title"><img src="assets/cicada-logo-256.png" width="44" height="44" alt="CicadaFarm logo"><b>CICADAFARM</b><small>REAL FARM · REAL LIFE · NO BULLSHIT</small></div>
+</section>
+
+
+<div id="flyingRobot" role="button" tabindex="0" aria-label="Talk to Robotcyb" onclick="toggleRobot()" onkeydown="if(event.key==='Enter'||event.key===' ')toggleRobot()"><img id="flyingRobotImg" src="assets/robot.png" width="62" height="62" alt="Robotcyb" decoding="async"></div>
+
+<div id="robotBubble"></div>
+<div id="storageNotice" role="status" hidden>Browser storage is unavailable. Changes will last for this session only.</div>
+<button id="soundToggle" onclick="toggleFarmSound()">🔊 SOUND ON</button>
+<div class="ui">
+<header class="topbar">
+  <a class="brand" href="./" aria-label="CicadaFarm home"><img src="assets/cicada-logo-256.png" alt="" width="42" height="42"><span><b>CICADAFARM</b><small>living farm • explore • participate</small></span></a>
+</header>
+
+<!-- Orbital navigation: the interface is a constellation, not a toolbar. -->
+<nav class="orbital-nav" aria-label="CicadaFarm navigation">
+  <div class="orbit orbit-left">
+    <button class="planet p1" data-label="JOURNAL" aria-label="JOURNAL" onclick="openPanel('journal')"><span>📖</span></button>
+    <button class="planet p2" data-label="KNOWLEDGE" aria-label="KNOWLEDGE" onclick="openPanel('knowledge')"><span>🧬</span></button>
+    <button class="planet p3" data-label="CAMERAS" aria-label="CAMERAS" onclick="openPanel('camera')"><span>◉</span></button>
+    <button class="planet p4" data-label="HIVES" aria-label="HIVES" onclick="openPanel('hives')"><span>🐝</span></button>
+  </div>
+  <div class="orbit orbit-right">
+    <button class="planet p5" data-label="MARKET" aria-label="MARKET" onclick="openPanel('market')"><span>🛒</span></button>
+    <button class="planet p6" data-label="ROBOTCYB BRAIN" aria-label="ROBOTCYB BRAIN" onclick="openPanel('brain')"><span>🧠</span></button>
+    <button class="planet p7" data-label="NETWORK" aria-label="NETWORK" onclick="openPanel('network')"><span>⌁</span></button>
+    <button class="planet p8" data-label="TOKEN" aria-label="TOKEN" onclick="openPanel('token')"><span>◈</span></button>
+    <button class="planet p9 solarPlanet" data-label="SOLAR CORE" aria-label="SOLAR CORE" onclick="openPanel('solar')"><span>☀️</span></button>
+    <button class="planet p10" data-label="CYBCHAT" aria-label="CYBCHAT" onclick="openPanel('cybchat')"><span>⌁</span></button>
+  </div>
+</nav>
+
+<main class="mapwrap">
+<div class="map"><div id="grassLayer"></div>
+<svg class="milkyway" viewBox="0 0 1000 690" preserveAspectRatio="none" aria-hidden="true">
+ <path d="M70 595 C180 520 220 470 330 420 S520 350 570 300 S760 220 925 115"/>
+ <path class="core" d="M95 600 C210 540 270 455 380 430 S535 350 610 310 S790 250 910 135"/>
+ <path d="M130 125 C250 180 300 250 420 290 S570 390 690 470 S800 535 900 590"/>
+</svg>
+<div id="milkyStars"></div><div id="flyingCyb" class="flycyb">✦</div><button class="mow" onclick="mowGrass()">✂ MOW GRASS</button>
+<div class="road r1"></div><div class="road r2"></div>
+
+<div class="sector acorn" onclick="openSector('Acorn Land','Old trees, seeds and shade.','🌰')"><span class="badge">01</span><h3>ACORN LAND</h3><small>oaks · seeds · shade</small></div>
+<div class="sector bee" onclick="openSector('Bee Land','Hives, flowers and beekeeping observations.','🐝')"><span class="badge">12 HIVES</span><h3>BEE LAND</h3><small>bees · honey · cameras</small><div class="animals">🐝 🐝 🐝 🐝</div></div>
+
+<div class="sector garden" onclick="openSector('Garden','The garden changes with the seasons.','🌱')"><h3>GARDEN</h3><small>cucumbers · corn · harvest</small><div class="animals">🥒 🌽 🥕 🌱</div></div>
+<div class="sector orchard" onclick="openSector('Orchard','Orchard: apples, pears and seasonal harvest.','🍎')"><h3>ORCHARD</h3><small>apples · pears</small><div class="animals">🍎 🍐 🍏</div></div>
+
+<div class="sector marketZone" onclick="openPanel('market')"><span class="badge">SHOP</span><h3>FARM MARKET</h3><small>ivan tea · cedar nuts · honey · eggs</small><div class="animals">🌿 🌰 🍯 🥚</div></div>
+<div class="sector forest" onclick="openSector('Forest','The forest follows the seasons: rain, falling leaves, snow and spring awakening.','🌲')"><h3>FOREST</h3><small>seasonal forest</small><div class="animals">🌲 🌳 🍂 🦌</div></div>
+<div class="sector lake" onclick="openSector('Lake','Lake, fish, ducks and geese.','🌊')"><h3>LAKE</h3><small>fish · crayfish · birds</small><div class="animals">🐟 🐟 🦆 🪿</div></div>
+
+<div class="sector chicken" onclick="openAnimalRoom('Chicken Coop','🐔','10 chickens','chicken')"><h3>CHICKEN</h3><small>feed · eggs · camera</small><div class="animals">🐔 🐔 🐔 🐔 🥚</div></div>
+<div class="sector turkey" onclick="openAnimalRoom('Turkey House','🦃','10 turkeys','turkey')"><h3>TURKEY HOUSE</h3><small>10 turkeys · camera</small><div class="animals">🦃 🦃 🦃 🦃 🦃</div></div>
+<div class="sector goat" onclick="openAnimalRoom('Goat House','🐐','3 goats','goat')"><h3>GOAT HOUSE</h3><small>milk · feed · camera</small><div class="animals">🐐 🐐 🐐</div></div>
+<div class="sector ducks" onclick="openAnimalRoom('Duck House','🦆','60 ducks','duck')"><h3>DUCK HOUSE</h3><small>60 ducks · camera</small><div class="animals">🦆 🦆 🦆 🦆 🦆</div></div>
+<div class="sector geese" onclick="openAnimalRoom('Goose House','🪿','40 geese','goose')"><h3>GOOSE HOUSE</h3><small>40 geese · camera</small><div class="animals">🪿 🪿 🪿 🪿 🪿</div></div>
+
+<div class="sector farmhouse" onclick="openPanel('journal')"><h3>FARM HOUSE</h3><small>journal · kitchen · life</small></div>
+
+<div class="flower f1">🌼</div><div class="flower f2">🌼</div><div class="flower f3">🌼</div>
+<div class="harvest">🌽 🥒 🍎 🍐</div>
+</div>
+</main>
+<div class="cyberbar" style="margin:0 14px 8px"><span><b>PHYSICAL FARM ↔ DIGITAL TWIN</b> · sensors · animals · energy · Robotcyb</span><span class="kicker">CYBER-PHYSICAL LAYER</span></div>
+
+<div class="bottom">
+  <div class="card"><div>● CICADAFARM · DEMO VIEW</div><div class="stats">
+    <div class="stat"><b id="temp">24°</b><span>weather</span></div>
+    <div class="stat"><b>12</b><span>hives</span></div>
+    <div class="stat"><b>10</b><span>turkeys</span></div>
+    <div class="stat"><b>60</b><span>ducks</span></div>
+    <div class="stat"><b>40</b><span>geese</span></div>
+  </div></div>
+  <div class="season"><span id="seasonName">☀️ SUMMER</span> · <button style="background:none;border:0;color:#dff;cursor:pointer" onclick="cycleSeason()">change season</button></div>
+</div>
+
+<div id="robotPanel">
+ <div class="card">
+   <button class="close" aria-label="Close" onclick="toggleRobot()">×</button>
+   <b style="color:#7dffbd">ROBOTCYB</b>
+   <div id="robotMsg" style="margin-top:8px;font-size:11px">I am the CicadaFarm agent. Ask me about the farm, recipes or knowledge. I can joke too — sometimes successfully.</div>
+   <input id="robotInput" placeholder="Ask ROBOTCYB..." onkeydown="if(event.key==='Enter')askRobot()">
+   <button class="primary" onclick="askRobot()">ASK</button>
+ </div>
+</div>
+
+<div id="panel" class="panel" role="dialog" aria-modal="true" aria-label="Farm details" onclick="if(event.target===this)closePanel()">
+ <div class="panelbox"><button class="close" aria-label="Close" onclick="closePanel()">×</button><div id="content"></div></div>
+</div>
+</div>
+
+
+<noscript><div class="no-script">Enable JavaScript to explore the farm.</div></noscript>
+</body>
+</html>
