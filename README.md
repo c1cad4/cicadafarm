@@ -40,12 +40,14 @@ The farm values, sensor states, chat responses and camera-hub labels are demonst
 Serve this repository as a static site. All assets use relative paths, including when hosted at `/cicadafarm/`. For GitHub Pages, select the `main` branch and root directory in **Settings → Pages**. The `.nojekyll` file keeps these static assets unchanged. The expected Pages URL is https://c1cad4.github.io/cicadafarm/ once Pages is enabled and deployment completes.
 
 ### Robotcyb experience
-The header portal connects this farm to https://robotcyb.ai/ with a short transition (skipped for reduced motion). Entering the farm enables a quiet synthesized cosmic sound and seasonal ambience; SOUND turns all audio off. Hidden tabs suspend audio.
+The header portal connects this farm to https://robotcyb.ai/ through a shared multicolor star portal (skipped for reduced motion). Entering the farm enables a quiet synthesized cosmic sound and seasonal ambience; SOUND turns all audio off. Hidden tabs suspend audio.
 
-Robotcyb has a Russian/English project guide plus optional browser inference using WebLLM 0.2.85 and SmolLM2 135M (q0f16). The model downloads from Hugging Face only on LOAD SMALL AI, approximately 300 MB, and requires WebGPU plus sufficient GPU memory. Computation runs in a module worker; STOP AI terminates it. Small-model answers are fallible and English works best. Conversation stays on-device; model/runtime downloads contact jsDelivr, Hugging Face and MLC's model library host. No API key or paid server is needed.
+Robotcyb has a Russian/English project guide plus browser inference using WebLLM 0.2.85 and Qwen2.5 0.5B (q4f16). The model downloads automatically in the background from Hugging Face, approximately 300 MB, and requires WebGPU plus sufficient GPU memory. Computation runs in a module worker; STOP AI terminates it; RETRY AI restarts it. Small-model answers are fallible and Russian and English are supported. Conversation stays on-device; model/runtime downloads contact jsDelivr, Hugging Face and MLC's model library host. No API key or paid server is needed.
 
 The token address comes from the supplied project source. Market metrics are shown only for the matching Solana pool returned by GeckoTerminal for the configured PumpSwap pool; missing fields mean unavailable data, not a fabricated zero price. The contract and direct links remain visible.
 
 Token metrics refresh once per minute while the panel is open. Verified market cap and FDV remain separate; API null values are never displayed as zero. Seasonal ambience includes a quiet orbital pad with season-specific notes, layered below wind/rain textures.
 
 Ambient modulation uses slow 18–40 second cycles, softened upper frequencies, a six-second chord fade-in and 1.8-second crossfades between seasons.
+
+Robotcyb and CicadaFarm use the same portal renderer and local AI runtime. Automatic warm-up starts when the initial UI is ready. During loading the guide/original mode responses remain available. Model loading progress is shown in chat, and GPU/runtime failures leave the original experience usable. Portal canvas is active only during departure/arrival, caps at 30 fps and uses fewer particles on mobile.

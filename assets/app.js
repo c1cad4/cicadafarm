@@ -347,7 +347,7 @@ async function fetchToken(){
 }
 
 function toggleRobot(){const r=document.getElementById("robotPanel");r.style.display=r.style.display==="block"?"none":"block";}
-async function askRobot(){const input=document.getElementById('robotInput'),q=input.value.trim();if(!q || RobotMind.busy)return;input.value='';const box=document.getElementById('robotMsg');box.textContent='Robotcyb is thinking…';box.textContent=await RobotMind.reply(q);}
+async function askRobot(){const input=document.getElementById('robotInput'),q=input.value.trim();if(!q)return;input.value='';const box=document.getElementById('robotMsg');box.textContent='Robotcyb is thinking…';box.textContent=await RobotMind.reply(q);}
 
 /* Living farm simulation: grass regrows, animals move inside their own rooms, fish swim in the lake. */
 function seedGrass(){
