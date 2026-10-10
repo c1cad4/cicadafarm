@@ -11,14 +11,18 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/health")
-      return Response.json({
-        service: "CicadaFarm Swarm",
-        capacity: 12,
-        rooms: 20,
-        rules: "swarm-social-v3",
-        currencies: ["SOL", "CICADAFARM", "ROBOTCYB"],
-        agentProtocol: "/agents.json",
-      });
+      return Response.json(
+        {
+          service: "CicadaFarm Swarm",
+          capacity: 12,
+          rooms: 20,
+          rules: "swarm-social-v3",
+          checkoutConfigured: !!env.SOLANA_RPC_URL,
+          currencies: ["SOL", "CICADAFARM", "ROBOTCYB"],
+          agentProtocol: "/agents.json",
+        },
+        { headers: { "Access-Control-Allow-Origin": "*" } },
+      );
     if (url.pathname === "/agents.json")
       return Response.json({
         protocol: "swarm-v3",

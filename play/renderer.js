@@ -1,3 +1,4 @@
+import { drawBackdrop } from "./backdrop.js";
 import { flag } from "../multiplayer/profile.js";
 import { radius, safe } from "../multiplayer/model.js";
 export function drawScene(
@@ -19,9 +20,8 @@ export function drawScene(
     ctx.fillStyle = color;
     ctx.fill();
   };
-  ctx.fillStyle = "#091b13";
-  ctx.fillRect(0, 0, mapW, mapH);
-  ctx.strokeStyle = "#244632";
+  drawBackdrop(ctx, mapW, mapH);
+  ctx.strokeStyle = "#24463288";
   ctx.lineWidth = 0.5;
   for (let x = 0; x < mapW; x += 42) {
     ctx.beginPath();
@@ -68,29 +68,43 @@ export function drawScene(
     ctx.fillStyle = "#deb45b";
     ctx.fillRect(500 + Math.cos(a) * 50 - 5, 270 + Math.sin(a) * 50 - 5, 10, 9);
   }
-  ctx.fillStyle = "#e1e4a5";
-  ctx.fillRect(488, 264, 24, 18);
-  ctx.fillStyle = "#cf995b";
-  ctx.beginPath();
-  ctx.moveTo(483, 264);
-  ctx.lineTo(500, 249);
-  ctx.lineTo(517, 264);
-  ctx.fill();
-  ctx.font = "10px system-ui";
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#d5e8b7";
-  ctx.fillText(options.safeLabel || "SAFE FARM", 500, 367);
-  for (const h of (world.homes || []).slice(1)) {
-    circle(h.x, h.y, 75, "#20432b");
-    ctx.strokeStyle = "#9edd78";
-    ctx.beginPath();
-    ctx.arc(h.x, h.y, 75, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.font = "28px system-ui";
-    ctx.fillStyle = "#d5e8b7";
-    ctx.fillText("⌂", h.x, h.y + 8);
+  for (const h of world.homes || [{ x: 500, y: 270 }]) {
+    if (h.x !== 500 || h.y !== 270) {
+      circle(h.x, h.y, 75, "#20432b");
+      ctx.strokeStyle = "#9edd78";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(h.x, h.y, 75, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.save();
+    ctx.translate(h.x, h.y);
+    // Stacked beehive with brass bands and an illuminated entrance.
+    ctx.fillStyle = "#302a1d";
+    ctx.fillRect(-21, 20, 42, 5);
+    for (let i = 0; i < 3; i++) {
+      ctx.fillStyle = ["#ac854a", "#c59c58", "#d8b56b"][i];
+      ctx.fillRect(-18, -12 + i * 11, 36, 10);
+      ctx.fillStyle = "#efd59c55";
+      ctx.fillRect(-17, -12 + i * 11, 34, 2);
+      ctx.fillStyle = "#775c34";
+      ctx.fillRect(-18, -3 + i * 11, 36, 1);
+    }
+    ctx.fillStyle = "#e7cd90";
+    ctx.fillRect(-22, -17, 44, 5);
+    ctx.fillStyle = "#344231";
+    ctx.fillRect(-7, 12, 14, 5);
+    ctx.fillStyle = "#b9e793";
+    ctx.fillRect(-5, 13, 10, 2);
+    ctx.font = "9px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#c2ddb1";
+    ctx.fillText("✦", 0, 2);
+    ctx.restore();
     ctx.font = "10px system-ui";
-    ctx.fillText(options.safeLabel || "SAFE FARM", h.x, h.y + 97);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#d5e8b7";
+    ctx.fillText(options.safeLabel || "SAFE HIVE", h.x, h.y + 97);
   }
   for (const p of world.thorns || []) {
     ctx.save();

@@ -133,6 +133,13 @@ export class Accounts {
         return json(inventory);
       }
       if (path === "/api/quote") {
+        if (!this.env.SOLANA_RPC_URL)
+          return json(
+            {
+              error: "Checkout is awaiting secure RPC setup. No payment sent.",
+            },
+            503,
+          );
         const item = ITEMS[body.item],
           currency = CURRENCIES[body.currency];
         if (!item || !currency)

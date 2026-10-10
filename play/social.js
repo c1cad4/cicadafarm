@@ -23,7 +23,7 @@ const words = {
     retry: "Verify receipt",
     equip: "Equip",
     clear: "Remove effect",
-    fee: "Permanent cosmetic. No gameplay advantage. Network fees are extra. Purchases are mainnet transfers.",
+    fee: "Permanent cosmetic. No gameplay advantage. Network fees and token-account setup costs are extra. Purchases are mainnet transfers.",
     read: "Chat is public in this room. Do not share private details.",
     none: "No effect",
     wallet: "Signed wallet",
@@ -58,7 +58,7 @@ const words = {
     retry: "Проверить чек",
     equip: "Надеть",
     clear: "Убрать эффект",
-    fee: "Постоянное украшение без преимущества в игре. Комиссии сети отдельно. Оплата в основной сети Solana.",
+    fee: "Постоянное украшение без преимущества в игре. Комиссии сети и создание токен-счёта отдельно. Оплата в основной сети Solana.",
     read: "Чат открыт участникам комнаты. Не публикуй личные данные.",
     none: "Без эффекта",
     wallet: "Кошелёк подтверждён",
@@ -92,7 +92,7 @@ const words = {
     retry: "验证收据",
     equip: "装备",
     clear: "移除效果",
-    fee: "永久装饰，不提供游戏优势。另付网络费，使用 Solana 主网。",
+    fee: "永久装饰，不提供游戏优势。另付网络费及代币账户创建费用，使用 Solana 主网。",
     read: "房间聊天公开，请勿透露隐私。",
     none: "无效果",
     wallet: "已签名钱包",
@@ -113,6 +113,7 @@ const words = {
 };
 const t = (k) => (words[document.documentElement.lang] || words.en)[k];
 export function socialUI(getSocket) {
+  let checkoutConfigured = false;
   let auth = null,
     provider = null,
     busy = false,
@@ -130,7 +131,7 @@ export function socialUI(getSocket) {
   panel.id = "socialPanel";
   panel.hidden = true;
   panel.innerHTML =
-    '<div class="social-head"><strong id="socialTitle"></strong><button id="socialClose" aria-label="Close">×</button></div><div class="wallet-actions"><button id="phantom"></button><button id="solflare"></button><button id="walletLogout" hidden></button></div><p id="walletInfo"></p><p id="socialRead"></p><ol id="chatLog" aria-label="Chat"></ol><form id="chatForm"><input id="chatInput" maxlength="180" autocomplete="off"><button id="chatSend" type="submit"></button></form><h3 id="shopTitle"></h3><div class="shop-controls"><label id="currencyLabel" for="currency"></label><select id="currency"><option>SOL</option><option>CICADAFARM</option><option>ROBOTCYB</option></select></div><div id="shopItems"></div><button id="clearEffect"></button><section id="invoice" hidden><p id="invoiceDetails"></p><button id="payInvoice"></button><button id="verifyInvoice"></button><a id="receiptLink" target="_blank" rel="noopener" hidden>Solscan ↗</a></section><p id="shopFees"></p><p id="socialStatus" role="status" aria-live="polite"></p>';
+    '<div class="social-head"><strong id="socialTitle"></strong><button id="socialClose" aria-label="Close">×</button></div><div class="wallet-actions"><button id="phantom"></button><button id="solflare"></button><button id="walletLogout" hidden></button></div><p id="walletInfo"></p><p id="socialRead"></p><ol id="chatLog" aria-label="Chat"></ol><form id="chatForm"><input id="chatInput" maxlength="180" autocomplete="off"><button id="chatSend" type="submit"></button></form><h3 id="shopTitle"></h3><p id="checkoutNotice"></p><div class="shop-controls"><label id="currencyLabel" for="currency"></label><select id="currency"><option>SOL</option><option>CICADAFARM</option><option>ROBOTCYB</option></select></div><div id="shopItems"></div><button id="clearEffect"></button><section id="invoice" hidden><p id="invoiceDetails"></p><button id="payInvoice"></button><button id="verifyInvoice"></button><a id="receiptLink" target="_blank" rel="noopener" hidden>Solscan ↗</a></section><p id="shopFees"></p><p id="socialStatus" role="status" aria-live="polite"></p>';
   document.querySelector(".arena").append(panel);
   const toggle = document.createElement("button");
   toggle.id = "socialToggle";
@@ -151,9 +152,21 @@ export function socialUI(getSocket) {
     });
     const data = await r.json();
     if (!r.ok || data.error)
-      throw Object.assign(Error(data.error || "Request failed"), {
-        status: r.status,
-      });
+      throw Object.assign(
+        Error(
+          data.error ===
+            "Checkout is awaiting secure RPC setup. No payment sent."
+            ? {
+                en: "Checkout is being connected. No payment sent.",
+                ru: "Оплата пока подключается. Деньги не отправлены.",
+                "zh-CN": "付款服务正在配置，未发送资金。",
+              }[document.documentElement.lang] || data.error
+            : data.error || "Request failed",
+        ),
+        {
+          status: r.status,
+        },
+      );
     return data;
   }
   function sendAuth() {
@@ -194,6 +207,13 @@ export function socialUI(getSocket) {
       ["verifyInvoice", "retry"],
     ])
       $(id).textContent = t(key);
+    $("checkoutNotice").hidden = checkoutConfigured;
+    $("checkoutNotice").textContent =
+      {
+        en: "Purchases are being connected. No funds are sent until checkout is ready.",
+        ru: "Покупки пока подключаются. До готовности оплаты деньги не отправляются.",
+        "zh-CN": "购买服务正在配置，准备就绪前不会发送资金。",
+      }[document.documentElement.lang] || "Purchases are being connected.";
     $("chatInput").placeholder = t("message");
     $("chatInput").setAttribute("aria-label", t("message"));
     $("walletInfo").textContent = auth
@@ -412,6 +432,13 @@ export function socialUI(getSocket) {
     attributeFilter: ["lang"],
   });
   refresh();
+  fetch(API + "/health")
+    .then((r) => r.json())
+    .then((data) => {
+      checkoutConfigured = !!data.checkoutConfigured;
+      refresh();
+    })
+    .catch(() => {});
   if (auth)
     api("me")
       .then((data) => {

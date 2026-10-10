@@ -219,7 +219,7 @@ for (const l of Object.keys(text)) Object.assign(text[l], additions[l]);
 for (const [l, v] of Object.entries({
   en: {
     mass: "POLLEN MASS",
-    safe: "SAFE FARM",
+    safe: "SAFE HIVE",
     hint: "Collect pollen, grow and absorb smaller cicadas • the farm is safe",
     full: "Cargo full — pollen still grows your cicada. Return to bank it!",
     instructions:
@@ -236,7 +236,7 @@ for (const [l, v] of Object.entries({
   },
   ru: {
     mass: "МАССА ПЫЛЬЦЫ",
-    safe: "БЕЗОПАСНАЯ ФЕРМА",
+    safe: "ЗАЩИТНЫЙ УЛЕЙ",
     hint: "Собирай пыльцу, расти и поглощай меньших цикад • на ферме безопасно",
     full: "Груз полон — пыльца продолжает увеличивать цикаду. Доставь урожай!",
     instructions:
@@ -253,7 +253,7 @@ for (const [l, v] of Object.entries({
   },
   "zh-CN": {
     mass: "花粉质量",
-    safe: "安全农场",
+    safe: "安全蜂箱",
     hint: "收集花粉，成长并吸收较小的蝉 · 农场内安全",
     full: "载荷已满，花粉仍使蝉成长。返回农场交付！",
     instructions:
