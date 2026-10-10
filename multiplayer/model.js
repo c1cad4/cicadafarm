@@ -1,12 +1,146 @@
-export const WIDTH=1000,HEIGHT=540,CAPACITY=12;
-export function name(value){return typeof value==='string'?value.replace(/[\p{C}<>]/gu,'').trim().slice(0,20)||'Cicada':'Cicada'}
+export const WIDTH = 1000,
+  HEIGHT = 540,
+  CAPACITY = 12;
+export function name(value) {
+  return typeof value === "string"
+    ? value
+        .replace(/[\p{C}<>]/gu, "")
+        .trim()
+        .slice(0, 20) || "Cicada"
+    : "Cicada";
+}
 export class World {
- constructor(random=Math.random){this.random=random;this.players=new Map();this.reset()}
- reset(){this.elapsed=0;this.total=0;this.resources=[];this.spawn=0;this.thorns=Array.from({length:7},(_,i)=>({x:500+Math.cos(i*2*Math.PI/7)*330,y:270+Math.sin(i*2*Math.PI/7)*150}));for(let i=0;i<65;i++)this.seed();for(const p of this.players.values())Object.assign(p,{x:500,y:270,cargo:0,score:0,hit:0,input:null})}
- seed(){let p;for(let i=0;i<20;i++){p={x:25+this.random()*950,y:90+this.random()*385,kind:Math.floor(this.random()*3)};if(Math.hypot(p.x-500,p.y-270)>95)break}this.resources.push(p)}
- join(id,nick){if(this.players.has(id))return this.players.get(id);if(this.players.size>=CAPACITY)return null;const p={id,name:name(nick),x:500,y:270,angle:0,cargo:0,score:0,hit:0,input:null};this.players.set(id,p);return p}
- input(id,data){const p=this.players.get(id);if(!p)return;if(data===null){p.input=null;return}if(!data||!Number.isFinite(data.x)||!Number.isFinite(data.y))return;p.input={x:Math.max(13,Math.min(987,data.x)),y:Math.max(87,Math.min(485,data.y))}}
- step(dt){dt=Math.min(.1,Math.max(0,dt));this.elapsed+=dt;if(this.elapsed>=190){this.reset();return}if(this.elapsed>=180)return;const weather=Math.floor(this.elapsed/45);for(const p of this.players.values()){p.hit=Math.max(0,p.hit-dt);if(p.input){const dx=p.input.x-p.x,dy=p.input.y-p.y,d=Math.hypot(dx,dy),speed=(weather===3?105:145)-p.cargo*.8;if(d>3){p.angle=Math.atan2(dy,dx);const step=Math.min(d,speed*dt);p.x+=dx/d*step;p.y+=dy/d*step}}if(weather===2)p.x=Math.max(13,Math.min(987,p.x+Math.sin(this.elapsed*.8)*18*dt));for(let i=this.resources.length-1;i>=0;i--)if(p.cargo<20&&Math.hypot(p.x-this.resources[i].x,p.y-this.resources[i].y)<18){this.resources.splice(i,1);p.cargo++}if(p.cargo&&Math.hypot(p.x-500,p.y-270)<57){p.score+=p.cargo;this.total+=p.cargo;p.cargo=0}if(!p.hit&&p.cargo&&this.thorns.some(q=>Math.hypot(p.x-q.x,p.y-q.y)<22)){p.cargo=Math.max(0,p.cargo-5);p.hit=1.5}}
- this.spawn+=dt;if(this.spawn>(weather===1?.12:weather===3?.7:.32)){this.spawn=0;if(this.resources.length<85)this.seed()}}
- snapshot(){return {type:'world',elapsed:this.elapsed,total:this.total,players:[...this.players.values()].map(({input,hit,...p})=>p),resources:this.resources,thorns:this.thorns}}
+  constructor(random = Math.random) {
+    this.random = random;
+    this.players = new Map();
+    this.reset();
+  }
+  reset() {
+    this.elapsed = 0;
+    this.total = 0;
+    this.resources = [];
+    this.spawn = 0;
+    this.thorns = Array.from({ length: 7 }, (_, i) => ({
+      x: 500 + Math.cos((i * 2 * Math.PI) / 7) * 330,
+      y: 270 + Math.sin((i * 2 * Math.PI) / 7) * 150,
+    }));
+    for (let i = 0; i < 65; i++) this.seed();
+    for (const p of this.players.values())
+      Object.assign(p, {
+        x: 500,
+        y: 270,
+        cargo: 0,
+        score: 0,
+        hit: 0,
+        input: null,
+      });
+  }
+  seed() {
+    let p;
+    for (let i = 0; i < 20; i++) {
+      p = {
+        x: 25 + this.random() * 950,
+        y: 90 + this.random() * 385,
+        kind: Math.floor(this.random() * 3),
+      };
+      if (Math.hypot(p.x - 500, p.y - 270) > 95) break;
+    }
+    this.resources.push(p);
+  }
+  join(id, nick) {
+    if (this.players.has(id)) return this.players.get(id);
+    if (this.players.size >= CAPACITY) return null;
+    const p = {
+      id,
+      name: name(nick),
+      x: 500,
+      y: 270,
+      angle: 0,
+      cargo: 0,
+      score: 0,
+      hit: 0,
+      input: null,
+    };
+    this.players.set(id, p);
+    return p;
+  }
+  input(id, data) {
+    const p = this.players.get(id);
+    if (!p) return;
+    if (data === null) {
+      p.input = null;
+      return;
+    }
+    if (!data || !Number.isFinite(data.x) || !Number.isFinite(data.y)) return;
+    p.input = {
+      x: Math.max(13, Math.min(987, data.x)),
+      y: Math.max(87, Math.min(485, data.y)),
+    };
+  }
+  step(dt) {
+    dt = Math.min(0.1, Math.max(0, dt));
+    this.elapsed += dt;
+    if (this.elapsed >= 190) {
+      this.reset();
+      return;
+    }
+    if (this.elapsed >= 180) return;
+    const weather = Math.floor(this.elapsed / 45);
+    for (const p of this.players.values()) {
+      p.hit = Math.max(0, p.hit - dt);
+      if (p.input) {
+        const dx = p.input.x - p.x,
+          dy = p.input.y - p.y,
+          d = Math.hypot(dx, dy),
+          speed = (weather === 3 ? 105 : 145) - p.cargo * 0.8;
+        if (d > 3) {
+          p.angle = Math.atan2(dy, dx);
+          const step = Math.min(d, speed * dt);
+          p.x += (dx / d) * step;
+          p.y += (dy / d) * step;
+        }
+      }
+      if (weather === 2)
+        p.x = Math.max(
+          13,
+          Math.min(987, p.x + Math.sin(this.elapsed * 0.8) * 18 * dt),
+        );
+      for (let i = this.resources.length - 1; i >= 0; i--)
+        if (
+          p.cargo < 20 &&
+          Math.hypot(p.x - this.resources[i].x, p.y - this.resources[i].y) < 18
+        ) {
+          this.resources.splice(i, 1);
+          p.cargo++;
+        }
+      if (p.cargo && Math.hypot(p.x - 500, p.y - 270) < 57) {
+        p.score += p.cargo;
+        this.total += p.cargo;
+        p.cargo = 0;
+      }
+      if (
+        !p.hit &&
+        p.cargo &&
+        this.thorns.some((q) => Math.hypot(p.x - q.x, p.y - q.y) < 22)
+      ) {
+        p.cargo = Math.max(0, p.cargo - 5);
+        p.hit = 1.5;
+      }
+    }
+    this.spawn += dt;
+    if (this.spawn > (weather === 1 ? 0.12 : weather === 3 ? 0.7 : 0.32)) {
+      this.spawn = 0;
+      if (this.resources.length < 85) this.seed();
+    }
+  }
+  snapshot() {
+    return {
+      type: "world",
+      elapsed: this.elapsed,
+      total: this.total,
+      players: [...this.players.values()].map(({ input, hit, ...p }) => p),
+      resources: this.resources,
+      thorns: this.thorns,
+    };
+  }
 }
