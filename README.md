@@ -51,3 +51,7 @@ Token metrics refresh once per minute while the panel is open. Verified market c
 Ambient modulation uses slow 18–40 second cycles, softened upper frequencies, a six-second chord fade-in and 1.8-second crossfades between seasons.
 
 Robotcyb and CicadaFarm use the same portal renderer and local AI runtime. Automatic warm-up starts when the initial UI is ready. During loading the guide/original mode responses remain available. Model loading progress is shown in chat, and GPU/runtime failures leave the original experience usable. Portal canvas is active only during departure/arrival, caps at 30 fps and uses fewer particles on mobile.
+
+## CicadaFarm: Swarm
+
+`play/` is a free, standalone canvas game with EN/RU/Chinese UI, pointer and keyboard controls, three-minute rounds, weather, computer-controlled bots and local progress. No wallet connection, payments, multiplayer or redeemable rewards are enabled. Local scores are not trusted for future paid entitlements or public rankings.
