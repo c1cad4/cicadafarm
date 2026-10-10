@@ -13,19 +13,27 @@ export class Accounts {
     this.env = env;
   }
   async rpc(method, params) {
-    const r = await fetch(
-      this.env.SOLANA_RPC_URL || "https://solana-rpc.publicnode.com",
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
-        signal: AbortSignal.timeout(10000),
-      },
+    const endpoints = this.env.SOLANA_RPC_URL
+      ? [this.env.SOLANA_RPC_URL]
+      : [
+          "https://api.mainnet-beta.solana.com",
+          "https://solana-rpc.publicnode.com",
+        ];
+    for (const endpoint of endpoints) {
+      try {
+        const r = await fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+          signal: AbortSignal.timeout(7000),
+        });
+        const data = await r.json();
+        if (r.ok && !data.error) return data.result;
+      } catch {}
+    }
+    throw Error(
+      "Solana verification unavailable; retry later without paying again",
     );
-    const data = await r.json();
-    if (!r.ok || data.error)
-      throw Error("Solana verification unavailable; retry later");
-    return data.result;
   }
   async fetch(request) {
     try {

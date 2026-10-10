@@ -231,3 +231,7 @@ test("chat removes controls and markup and bounds message length", async () => {
   assert.equal(cleanChat("x".repeat(500)).length, 180);
   assert.equal(cleanChat({ text: "bad" }), "");
 });
+test('RPC falls back after a provider rejects indexed requests; unavailable providers never verify payment', async()=>{
+ const {Accounts}=await import('../multiplayer/accounts.js'),a=new Accounts({storage:new Store()},{}),oldFetch=global.fetch;let calls=[];
+ try {global.fetch=async url=>{calls.push(url);return calls.length===1?Response.json({error:{message:'requires key'}}):Response.json({result:{value:{decimals:6}}});};assert.equal((await a.rpc('getTokenSupply',[])).value.decimals,6);assert.equal(calls.length,2);global.fetch=async()=>Response.json({error:{message:'unavailable'}});await assert.rejects(()=>a.rpc('getTransaction',[]),/unavailable/);}finally{global.fetch=oldFetch;}
+});
