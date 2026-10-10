@@ -2,11 +2,11 @@
   "@context": "https://schema.org",
   "@type": "OfferCatalog",
   "name": "CicadaFarm published catalogue",
-  "url": "https://c1cad4.github.io/cicadafarm/agents/",
+  "url": "https://cicadafarm.pages.dev/agents/",
   "itemListElement": [
     {
       "@type": "Offer",
-      "url": "https://c1cad4.github.io/cicadafarm/",
+      "url": "https://cicadafarm.pages.dev/",
       "price": 30,
       "priceCurrency": "USD",
       "description": "Merchant-published stock; confirm availability and delivery before payment. Shipping excluded.",
@@ -28,7 +28,7 @@
     },
     {
       "@type": "Offer",
-      "url": "https://c1cad4.github.io/cicadafarm/",
+      "url": "https://cicadafarm.pages.dev/",
       "price": 50,
       "priceCurrency": "USD",
       "description": "Merchant-published stock; confirm availability and delivery before payment. Shipping excluded.",
@@ -50,7 +50,7 @@
     },
     {
       "@type": "Offer",
-      "url": "https://c1cad4.github.io/cicadafarm/",
+      "url": "https://cicadafarm.pages.dev/",
       "price": 120,
       "priceCurrency": "USD",
       "description": "Merchant-published stock; confirm availability and delivery before payment. Shipping excluded.",
@@ -72,7 +72,7 @@
     },
     {
       "@type": "Offer",
-      "url": "https://c1cad4.github.io/cicadafarm/",
+      "url": "https://cicadafarm.pages.dev/",
       "price": 1,
       "priceCurrency": "USD",
       "description": "Merchant-published stock; confirm availability and delivery before payment. Shipping excluded.",
@@ -94,7 +94,7 @@
     },
     {
       "@type": "Offer",
-      "url": "https://c1cad4.github.io/cicadafarm/",
+      "url": "https://cicadafarm.pages.dev/",
       "price": 5000,
       "priceCurrency": "USD",
       "description": "Merchant-published stock; confirm availability and delivery before payment. Shipping excluded. Four hives shared across both rental terms.",
@@ -116,7 +116,7 @@
     },
     {
       "@type": "Offer",
-      "url": "https://c1cad4.github.io/cicadafarm/",
+      "url": "https://cicadafarm.pages.dev/",
       "price": 10000,
       "priceCurrency": "USD",
       "description": "Merchant-published stock; confirm availability and delivery before payment. Shipping excluded. Four hives shared across both rental terms.",

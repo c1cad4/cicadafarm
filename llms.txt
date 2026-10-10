@@ -8,11 +8,11 @@ Farm-impact figures and seasonal weather are illustrative estimates, not verifie
 
 ## Project and ordering
 
-- [Agent-readable English](https://c1cad4.github.io/cicadafarm/agents/): Static HTML with product prices, stock, payment workflow and data quality.
-- [Agent-readable Russian](https://c1cad4.github.io/cicadafarm/agents/ru.html): Russian version of the same facts.
-- [Agent-readable Chinese](https://c1cad4.github.io/cicadafarm/agents/zh.html): Simplified Chinese version of the same facts.
-- [JSON catalogue](https://c1cad4.github.io/cicadafarm/data/catalog.json): Prices, units, shared inventory, token mint, receiver wallet, rate source and capability limits.
-- [Schema.org catalogue](https://c1cad4.github.io/cicadafarm/data/catalog.schema.json): Structured offers with fixed USD unit prices.
-- [Interactive farm](https://c1cad4.github.io/cicadafarm/): Human interface with animated farm, local AI and Solana Pay checkout.
+- [Agent-readable English](https://cicadafarm.pages.dev/agents/): Static HTML with product prices, stock, payment workflow and data quality.
+- [Agent-readable Russian](https://cicadafarm.pages.dev/agents/ru.html): Russian version of the same facts.
+- [Agent-readable Chinese](https://cicadafarm.pages.dev/agents/zh.html): Simplified Chinese version of the same facts.
+- [JSON catalogue](https://cicadafarm.pages.dev/data/catalog.json): Prices, units, shared inventory, token mint, receiver wallet, rate source and capability limits.
+- [Schema.org catalogue](https://cicadafarm.pages.dev/data/catalog.schema.json): Structured offers with fixed USD unit prices.
+- [Interactive farm](https://cicadafarm.pages.dev/): Human interface with animated farm, local AI and Solana Pay checkout.
 - [Robotcyb](https://robotcyb.ai/): Other site in the same ecosystem, with its own separate token.
 - [Order contact](https://t.me/robot_cyb): Confirm inventory and delivery with the farm before payment.
