@@ -10,11 +10,6 @@ function readChat() {
     m.from.length <= 100 && m.text.length <= 4000 && Number.isFinite(m.ts) &&
     (m.transport === undefined || typeof m.transport === 'string'));
 }
-function readCart() {
-  return FarmRuntime.readArray(farmStore, 'cicadaMarketCart', 100, m =>
-    m && typeof m.name === 'string' && typeof m.variant === 'string' &&
-    m.name.length <= 100 && m.variant.length <= 200);
-}
 let farmEntered = false, entryLoading = false, entryController = null;
 function loadThree() {
   if (window.THREE) return Promise.resolve();
@@ -251,7 +246,7 @@ function openPanel(which){
 }
 let panelTrigger=null;
 function show(html){
-  stopCamera(); abortTokenRequest(); panelTrigger=document.activeElement;
+  window.stopMarket?.(); stopCamera(); abortTokenRequest(); panelTrigger=document.activeElement;
   document.getElementById('content').innerHTML=html;
   document.getElementById('panel').classList.add('open');
   document.body.classList.add('panel-open');
@@ -259,7 +254,7 @@ function show(html){
 }
 function closePanel(){
   document.getElementById('panel').classList.remove('open');
-  document.body.classList.remove('panel-open'); stopCamera(); abortTokenRequest();
+  document.body.classList.remove('panel-open'); window.stopMarket?.(); stopCamera(); abortTokenRequest();
   if(panelTrigger?.isConnected)panelTrigger.focus();
 }
 function knowledgePanel(){show(`<h2>📜 KNOWLEDGE ARCHIVE</h2><p class="muted">Preserve family and generational knowledge.</p>
@@ -270,23 +265,6 @@ function knowledgePanel(){show(`<h2>📜 KNOWLEDGE ARCHIVE</h2><p class="muted">
 }
 function saveKnowledge(){const t=document.getElementById("knowledgeText").value.trim();if(!t)return;const saved=farmStore.setItem("cicadaKnowledge",t.slice(0,8000));document.getElementById("knowledgeList").innerHTML="<div class='tile'><b>"+(saved?"Saved on this device":"Saved for this session")+"</b><small>"+escapeHtml(t.slice(0,180))+"</small></div>";}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
-function marketPanel(){
- show(`<h2>🛒 CICADAFARM MARKET</h2><p class="muted">Real farm goods, presented through the CicadaFarm cyber-market. Choose product, format and size.</p>
- <div class="cyberbar"><span><span class="pulse"></span> MARKET NODE ONLINE</span><span class="kicker">PHYSICAL GOODS · FUTURE CHECKOUT</span></div>
- <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
-  <div class="tile productCard"><div class="productIcon">🌿</div><b>IVAN TEA</b><small>Fireweed tea • farm / wild harvest</small><div class="stock">AVAILABLE FOR PRE-ORDER</div><label class="kicker">PACKAGING</label><select id="ivanPack" style="width:100%;margin:5px 0"><option>Glass Jar</option><option>Paper Bag</option></select><label class="kicker">SIZE</label><select id="ivanSize" style="width:100%;margin:5px 0"><option>50 g</option><option>100 g</option><option>250 g</option></select><button class="primary" onclick="addMarketItem('Ivan Tea',document.getElementById('ivanPack').value+' · '+document.getElementById('ivanSize').value)">ADD TO CART</button></div>
-  <div class="tile productCard"><div class="productIcon">🌰</div><b>CEDAR NUTS</b><small>Cedar nuts from the northern landscape</small><div class="stock">AVAILABLE FOR PRE-ORDER</div><label class="kicker">SIZE</label><select id="cedarSize" style="width:100%;margin:5px 0"><option>250 g</option><option>500 g</option><option>1 kg</option></select><button class="primary" onclick="addMarketItem('Cedar Nuts',document.getElementById('cedarSize').value)">ADD TO CART</button></div>
-  <div class="tile productCard"><div class="productIcon">🍯</div><b>FARM HONEY</b><small>Honey from CicadaFarm hives</small><div class="stock">SEASONAL</div><label class="kicker">SIZE</label><select id="honeySize" style="width:100%;margin:5px 0"><option>250 g</option><option>500 g</option><option>1 kg</option></select><button class="primary" onclick="addMarketItem('Farm Honey',document.getElementById('honeySize').value)">ADD TO CART</button></div>
-  <div class="tile productCard"><div class="productIcon">🥚</div><b>FARM EGGS</b><small>Fresh eggs from the farm</small><div class="stock">SEASONAL</div><label class="kicker">PACK</label><select id="eggSize" style="width:100%;margin:5px 0"><option>6 eggs</option><option>10 eggs</option><option>20 eggs</option></select><button class="primary" onclick="addMarketItem('Farm Eggs',document.getElementById('eggSize').value)">ADD TO CART</button></div>
- </div><div id="marketCart" style="margin-top:14px"></div><p class="muted">Prototype checkout: prices, stock, shipping and payment are deliberately not invented. They will connect to real farm inventory when ready.</p>`);
- renderMarketCart();
-}
-function addMarketItem(name,variant){const cart=readCart();if(cart.length>=100){alert('Your cart is full. Save or clear it before adding more items.');return;}cart.push({name,variant,ts:Date.now()});farmStore.setItem('cicadaMarketCart',JSON.stringify(cart));renderMarketCart();}
-function renderMarketCart(){const el=document.getElementById('marketCart');if(!el)return;const cart=readCart();el.innerHTML='<div class="tile"><b>🛒 CART · '+cart.length+' ITEM'+(cart.length===1?'':'S')+'</b>'+(cart.length?'<div style="margin-top:8px">'+cart.map((x,i)=>'<div style="display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid rgba(140,255,220,.1)"><span>'+escapeHtml(x.name)+' — '+escapeHtml(x.variant)+'</span><button onclick="removeMarketItem('+i+')" style="padding:3px 7px">×</button></div>').join('')+'</div><div class="actions"><button class="primary" onclick="checkoutMarket()">SAVE ORDER</button><button onclick="clearMarketCart()">CLEAR</button></div>':'<small>Your cart is empty.</small>')+'</div>';}
-function removeMarketItem(i){const cart=readCart();cart.splice(i,1);farmStore.setItem('cicadaMarketCart',JSON.stringify(cart));renderMarketCart();}
-function clearMarketCart(){farmStore.removeItem('cicadaMarketCart');renderMarketCart();}
-function checkoutMarket(){const cart=readCart();if(!cart.length)return;const saved=farmStore.setItem('cicadaLastOrder',JSON.stringify({created:new Date().toISOString(),items:cart,status:'DRAFT'}));alert((saved?'Order draft saved on this device.':'Order draft saved for this session only.')+' No payment was taken.');}
-
 function brainPanel(){
  show(`<h2>🧠 ROBOTCYB BRAIN</h2><p class="muted">Observe → interpret → recommend → ask a human when needed.</p><div class="cyberbar"><span><span class="pulse"></span> COGNITIVE CORE ONLINE</span><span class="kicker">FARM MEMORY ${farmStore.getItem('cicadaKnowledge')?'LOADED':'EMPTY'}</span></div><div class="grid"><div class="tile"><b class="metric">24°C</b><small>air temperature</small></div><div class="tile"><b class="metric">87%</b><small>solar battery</small></div><div class="tile"><b class="metric">HIGH</b><small>animal activity</small></div><div class="tile"><b class="metric">12</b><small>hives monitored</small></div></div><table class="cybertable"><tr><td>🐔 Chicken House</td><td class="statusOK">NORMAL</td></tr><tr><td>🦆 Duck House</td><td class="statusWarn">WATER CHECK</td></tr><tr><td>🐐 Goat House</td><td class="statusOK">WARM</td></tr><tr><td>🐝 Bee Land</td><td class="statusOK">ACTIVE</td></tr><tr><td>☀️ Solar Core</td><td class="statusOK">ENERGY POSITIVE</td></tr></table><div class="actions"><button class="primary" onclick="robotInsight()">RUN FARM SCAN</button><button onclick="openPanel('network')">OPEN NETWORK</button></div><div id="brainInsight" class="muted"></div>`);
 }
@@ -294,11 +272,6 @@ function robotInsight(){const el=document.getElementById('brainInsight');if(el)e
 function networkPanel(){
  show(`<h2>📡 CICADAFARM NETWORK</h2><p class="muted">Cyber-physical dashboard for sensors, cameras, energy and future digital-twin data.</p><div class="grid"><div class="tile"><b class="metric">ONLINE</b><small>farm gateway</small></div><div class="tile"><b class="metric">8</b><small>nodes</small></div><div class="tile"><b class="metric">87%</b><small>battery</small></div><div class="tile"><b class="metric">3.2 kW</b><small>demo load</small></div></div><table class="cybertable"><tr><td>🤖 Robotcyb flight controller</td><td class="statusOK">ONLINE</td></tr><tr><td>📹 Camera Hub</td><td class="statusOK">READY</td></tr><tr><td>🐝 Hive sensors</td><td class="statusOK">12 NODES</td></tr><tr><td>💧 Water sensors</td><td class="statusWarn">1 CHECK</td></tr><tr><td>☀️ Solar Core</td><td class="statusOK">ONLINE</td></tr><tr><td>🌡️ Weather station</td><td class="statusOK">ONLINE</td></tr></table><div class="actions"><button class="primary" onclick="openPanel('brain')">OPEN ROBOTCYB BRAIN</button><button onclick="alert('Digital Twin sync is ready for real sensor APIs. No fake live feed is claimed.')">SYNC DIGITAL TWIN</button></div>`);
 }
-function hivePanel(){show(`<h2>🍯 HIVE RENTAL</h2><p class="muted">Real hive CicadaFarm → care на farm → honey owner → monitoring through camera.</p>
-<div class="grid"><div class="tile"><b>1 YEAR</b><small>rental hive</small></div><div class="tile"><b>2 YEARS</b><small>rental hive</small></div><div class="tile"><b>LIVE</b><small>camera</small></div></div>
-<div class="actions"><button onclick="reserveHive(1)">🍯 Reserve 1 year</button><button onclick="reserveHive(2)">🍯 Reserve 2 yearа</button><button onclick="openPanel('camera')">📹 Watch cameras</button></div>
-<p>The owner receives honey that CicadaFarm harvests, packages and ships. В future status hive и camera are linked к его account.</p>`)}
-function reserveHive(years){alert("Hive reservation for "+years+" year(s). The next stage connects wallet + token payment.");}
 function cameraPanel(){show(`<h2>📹 CICADAFARM LIVE CAMERAS</h2><p class="muted">Animal rooms and hives will have separate live streams.</p>
 <div class="camera"><div class="scan"></div><b>CAMERA HUB</b></div><div class="grid"><div class="tile"><b>🐝 HIVE 01</b><small>live / future</small></div><div class="tile"><b>🦆 DUCK</b><small>live / future</small></div><div class="tile"><b>🐐 GOAT</b><small>live / future</small></div><div class="tile"><b>🐔 CHICKEN</b><small>live / future</small></div></div>
 <div class="actions"><button onclick="requestCamera()">📷 Connect device camera</button></div><p class="muted">For real farm here can underключить ESP32-CAM / IP camera / RTSP gateway.</p>`)}
