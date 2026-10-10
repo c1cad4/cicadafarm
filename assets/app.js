@@ -449,4 +449,4 @@ document.querySelectorAll(".sector").forEach(el=>{
 initEntryPixelTwin();
 
 
-window.addEventListener("farm-language-change",()=>{if(document.getElementById("cybchatMessages"))cybChatRender();});
+document.addEventListener("farm-language-change",()=>{if(document.getElementById("cybchatMessages"))cybChatRender();});
