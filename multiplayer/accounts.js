@@ -140,12 +140,24 @@ export class Accounts {
         if (inventory.owned.includes(body.item))
           return json({ error: "Already owned; equip it instead" }, 409);
         if (currency.mint) {
-          const supply = await this.rpc("getTokenSupply", [
+          const account = await this.rpc("getAccountInfo", [
             currency.mint,
-            { commitment: "finalized" },
+            { encoding: "jsonParsed", commitment: "finalized" },
           ]);
-          if (supply.value.decimals !== currency.decimals)
+          const mint = account?.value?.data?.parsed;
+          if (
+            account?.value?.owner !== currency.tokenProgram ||
+            mint?.type !== "mint" ||
+            mint.info.decimals !== currency.decimals
+          )
             throw Error("Token configuration mismatch");
+          if (
+            (mint.info.extensions || []).some(
+              (x) =>
+                !["metadataPointer", "tokenMetadata"].includes(x.extension),
+            )
+          )
+            throw Error("Unsupported token extension; payment disabled");
         }
         const block = await this.rpc("getLatestBlockhash", [
           { commitment: "confirmed" },
@@ -156,6 +168,7 @@ export class Accounts {
           item: body.item,
           currency: body.currency,
           mint: currency.mint,
+          tokenProgram: currency.tokenProgram,
           decimals: currency.decimals,
           raw: (BigInt(currency.raw) * BigInt(item.factor)).toString(),
           recipient: MERCHANT,

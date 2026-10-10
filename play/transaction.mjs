@@ -7,6 +7,7 @@ export function buildTransaction(library, q) {
     !c ||
     !item ||
     q.mint !== c.mint ||
+    q.tokenProgram !== c.tokenProgram ||
     q.decimals !== c.decimals ||
     BigInt(q.raw) !== BigInt(c.raw) * BigInt(item.factor) ||
     !/^swarm-[a-f0-9-]{36}$/.test(q.id)
@@ -26,7 +27,7 @@ export function buildTransaction(library, q) {
       }),
     );
   else {
-    const token = new PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+    const token = new PublicKey(q.tokenProgram),
       ata = new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"),
       mint = new PublicKey(q.mint);
     const address = (owner) =>

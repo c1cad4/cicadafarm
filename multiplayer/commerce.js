@@ -1,13 +1,15 @@
 export const MERCHANT = "AHBz386tP36ZrABN7STzxV66u1f7CwnaqrFBnevb4ff8";
 export const CURRENCIES = {
-  SOL: { mint: null, decimals: 9, raw: "1000000" },
+  SOL: { mint: null, tokenProgram: null, decimals: 9, raw: "1000000" },
   CICADAFARM: {
     mint: "9QLCEL7Xo9VTwgBeAYU1PWX7JJ8joKxQCYw3msjUpump",
+    tokenProgram: "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
     decimals: 6,
     raw: "1000000000",
   },
   ROBOTCYB: {
     mint: "8WZiguAp8NyFnwm8Z97k6sCbSRCWaW1YYXKeCTpupump",
+    tokenProgram: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
     decimals: 6,
     raw: "1000000000",
   },

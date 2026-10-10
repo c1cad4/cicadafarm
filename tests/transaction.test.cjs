@@ -20,6 +20,7 @@ test("wallet transaction uses exact merchant, memo and amounts for SOL and both 
       wallet: "11111111111111111111111111111111",
       recipient: MERCHANT,
       mint: c.mint,
+      tokenProgram: c.tokenProgram,
       decimals: c.decimals,
       raw: c.raw,
       currency,
@@ -52,6 +53,7 @@ test("wallet transaction uses exact merchant, memo and amounts for SOL and both 
       assert.equal(tx.instructions[0].keys[2].pubkey.toString(), MERCHANT);
       const transfer = tx.instructions[1];
       assert.equal(transfer.keys[1].pubkey.toString(), c.mint);
+      assert.equal(transfer.programId.toString(), c.tokenProgram);
       assert.equal(transfer.data[0], 12);
       assert.equal(
         new DataView(
