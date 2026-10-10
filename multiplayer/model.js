@@ -12,9 +12,14 @@ export function name(value) {
 }
 export const radius = (mass) =>
   10 + Math.sqrt(Math.max(0, Math.min(2000, mass || 20) - 20)) * 1.3;
-export const safe = (p) => Math.hypot(p.x - 500, p.y - 270) < 75;
+export const safe = (p, homes = [{ x: 500, y: 270 }]) =>
+  homes.some((h) => Math.hypot(p.x - h.x, p.y - h.y) < 75);
 export class World {
-  constructor(random = Math.random) {
+  constructor(random = Math.random, options = {}) {
+    this.dynamic = !!options.dynamic;
+    this.width = WIDTH;
+    this.height = HEIGHT;
+    this.homes = [{ x: 500, y: 270 }];
     this.random = random;
     this.players = new Map();
     this.reset();
@@ -54,6 +59,18 @@ export class World {
       });
     else p.respawns++;
   }
+  expand() {
+    if (!this.dynamic) return;
+    const sectors = Math.max(1, Math.ceil(this.players.size / 3));
+    const width = WIDTH + (sectors - 1) * 360;
+    if (width <= this.width) return;
+    const old = this.width;
+    this.width = width;
+    for (let x = old + 180; x < width; x += 360) {
+      this.homes.push({ x, y: 300 });
+      for (let i = 0; i < 24; i++) this.seed();
+    }
+  }
   seed(kind) {
     if (kind === undefined)
       kind = this.random() < 0.09 ? 3 : Math.floor(this.random() * 3);
@@ -61,11 +78,19 @@ export class World {
     for (let i = 0; i < 40; i++) {
       if (kind === 3) {
         const a = this.random() * Math.PI * 2;
-        p = { x: 500 + Math.cos(a) * 410, y: 270 + Math.sin(a) * 175, kind };
+        p = {
+          x: this.width / 2 + Math.cos(a) * (this.width / 2 - 90),
+          y: 270 + Math.sin(a) * 175,
+          kind,
+        };
       } else
-        p = { x: 25 + this.random() * 950, y: 115 + this.random() * 355, kind };
+        p = {
+          x: 25 + this.random() * (this.width - 50),
+          y: 115 + this.random() * 355,
+          kind,
+        };
       if (
-        Math.hypot(p.x - 500, p.y - 270) > 95 &&
+        this.homes.every((h) => Math.hypot(p.x - h.x, p.y - h.y) > 95) &&
         this.thorns.every((t) => Math.hypot(t.x - p.x, t.y - p.y) > 25)
       )
         break;
@@ -82,6 +107,7 @@ export class World {
     if (this.players.size >= CAPACITY) return null;
     const p = { id, name: name(nick), ...appearance(style) };
     this.players.set(id, p);
+    this.expand();
     this.respawn(p, true);
     return p;
   }
@@ -94,7 +120,7 @@ export class World {
     }
     if (!data || !Number.isFinite(data.x) || !Number.isFinite(data.y)) return;
     p.input = {
-      x: Math.max(13, Math.min(987, data.x)),
+      x: Math.max(13, Math.min(this.width - 13, data.x)),
       y: Math.max(115, Math.min(485, data.y)),
     };
   }
@@ -130,7 +156,10 @@ export class World {
       if (weather === 2)
         p.x = Math.max(
           13,
-          Math.min(987, p.x + Math.sin(this.elapsed * 0.8) * 18 * dt),
+          Math.min(
+            this.width - 13,
+            p.x + Math.sin(this.elapsed * 0.8) * 18 * dt,
+          ),
         );
       for (let i = this.resources.length - 1; i >= 0; i--) {
         const r = this.resources[i];
@@ -144,7 +173,10 @@ export class World {
         }
       }
       p.peak = Math.max(p.peak, p.mass);
-      if (p.cargo && Math.hypot(p.x - 500, p.y - 270) < 57) {
+      if (
+        p.cargo &&
+        this.homes.some((h) => Math.hypot(p.x - h.x, p.y - h.y) < 57)
+      ) {
         const n = p.cargo + p.rareCargo * 4;
         p.score += n;
         this.total += n;
@@ -171,8 +203,8 @@ export class World {
           p === q ||
           p.shield ||
           q.shield ||
-          safe(p) ||
-          safe(q) ||
+          safe(p, this.homes) ||
+          safe(q, this.homes) ||
           p.mass < q.mass * 1.25
         )
           continue;
@@ -192,12 +224,19 @@ export class World {
     this.spawn += dt;
     if (this.spawn > (weather === 1 ? 0.12 : weather === 3 ? 0.7 : 0.32)) {
       this.spawn = 0;
-      if (this.resources.length < 85) this.seed();
+      if (
+        this.resources.length <
+        85 + (this.dynamic ? (this.players.size - 1) * 18 : 0)
+      )
+        this.seed();
     }
   }
   snapshot() {
     return {
       type: "world",
+      width: this.width,
+      height: this.height,
+      homes: this.homes,
       elapsed: this.elapsed,
       total: this.total,
       players: [...this.players.values()].map(({ input, hit, ...p }) => p),

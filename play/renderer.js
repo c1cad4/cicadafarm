@@ -10,7 +10,9 @@ export function drawScene(
   now,
   options = {},
 ) {
-  ctx.setTransform((dpr * width) / 1000, 0, 0, (dpr * height) / 540, 0, 0);
+  const mapW = world.width || 1000,
+    mapH = world.height || 540;
+  ctx.setTransform((dpr * width) / mapW, 0, 0, (dpr * height) / mapH, 0, 0);
   const circle = (x, y, r, color) => {
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -18,19 +20,19 @@ export function drawScene(
     ctx.fill();
   };
   ctx.fillStyle = "#091b13";
-  ctx.fillRect(0, 0, 1000, 540);
+  ctx.fillRect(0, 0, mapW, mapH);
   ctx.strokeStyle = "#244632";
   ctx.lineWidth = 0.5;
-  for (let x = 0; x < 1000; x += 42) {
+  for (let x = 0; x < mapW; x += 42) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
-    ctx.lineTo(x, 540);
+    ctx.lineTo(x, mapH);
     ctx.stroke();
   }
-  for (let y = 0; y < 540; y += 42) {
+  for (let y = 0; y < mapH; y += 42) {
     ctx.beginPath();
     ctx.moveTo(0, y);
-    ctx.lineTo(1000, y);
+    ctx.lineTo(mapW, y);
     ctx.stroke();
   }
   const total = options.total ?? world.total ?? 0;
@@ -78,6 +80,18 @@ export function drawScene(
   ctx.textAlign = "center";
   ctx.fillStyle = "#d5e8b7";
   ctx.fillText(options.safeLabel || "SAFE FARM", 500, 367);
+  for (const h of (world.homes || []).slice(1)) {
+    circle(h.x, h.y, 75, "#20432b");
+    ctx.strokeStyle = "#9edd78";
+    ctx.beginPath();
+    ctx.arc(h.x, h.y, 75, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.font = "28px system-ui";
+    ctx.fillStyle = "#d5e8b7";
+    ctx.fillText("⌂", h.x, h.y + 8);
+    ctx.font = "10px system-ui";
+    ctx.fillText(options.safeLabel || "SAFE FARM", h.x, h.y + 97);
+  }
   for (const p of world.thorns || []) {
     ctx.save();
     ctx.translate(p.x, p.y);
@@ -115,7 +129,7 @@ export function drawScene(
       ctx.arc(p.x, p.y, r + 7, 0, Math.PI * 2);
       ctx.stroke();
     }
-    if (p.shield > 0 || safe(p)) {
+    if (p.shield > 0 || safe(p, world.homes)) {
       ctx.strokeStyle = "#8adfe277";
       ctx.setLineDash([3, 4]);
       ctx.beginPath();
@@ -140,6 +154,32 @@ export function drawScene(
     ctx.fill();
     circle(7, 0, 3, "#efffe7");
     ctx.restore();
+    if (p.cosmetic === "halo") {
+      ctx.strokeStyle = "#d9b4ff";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r + 15, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    if (p.cosmetic === "crown") {
+      ctx.font = "20px system-ui";
+      ctx.fillText("♛", p.x, p.y - r - 28);
+    }
+    if (p.cosmetic === "orbit") {
+      for (let i = 0; i < 3; i++) {
+        const a = now * 0.001 + i * 2.094;
+        circle(
+          p.x + Math.cos(a) * (r + 18),
+          p.y + Math.sin(a) * (r + 18),
+          3,
+          ["#ffc17b", "#79e4e2", "#ebafff"][i],
+        );
+      }
+    }
+    if (p.cosmetic === "banner" && p.country) {
+      ctx.font = "20px system-ui";
+      ctx.fillText(flag(p.country), p.x + r + 20, p.y);
+    }
     if (p.country) {
       ctx.fillStyle = "#07150fcc";
       ctx.fillRect(p.x - 11, p.y - 8, 22, 16);
@@ -150,7 +190,11 @@ export function drawScene(
     }
     ctx.font = "11px system-ui";
     ctx.fillStyle = "#ebfff2";
-    ctx.fillText(p.name || "Cicada", p.x, p.y - r - 15);
+    ctx.fillText(
+      (p.name || "Cicada") + (p.agent ? " [AI]" : ""),
+      p.x,
+      p.y - r - 15,
+    );
     ctx.font = "9px system-ui";
     ctx.fillStyle = color;
     ctx.fillText(String(Math.round(p.mass || 20)), p.x, p.y + r + 16);
@@ -170,7 +214,7 @@ export function drawScene(
   }
   if (weather === 3) {
     ctx.fillStyle = "#b7852910";
-    ctx.fillRect(0, 0, 1000, 540);
+    ctx.fillRect(0, 0, mapW, mapH);
   }
   if (options.target) {
     ctx.strokeStyle = "#d4ff8155";

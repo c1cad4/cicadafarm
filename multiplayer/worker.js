@@ -1,6 +1,9 @@
 import { World, name } from "./model.js";
+import { cleanChat } from "./commerce.js";
+export { Accounts } from "./accounts.js";
 const allowed = new Set([
   "https://cicadafarm.pages.dev",
+  "https://cicadafarm-game.pages.dev",
   "https://c1cad4.github.io",
   "http://127.0.0.1:8767",
 ]);
@@ -12,9 +15,49 @@ export default {
         service: "CicadaFarm Swarm",
         capacity: 12,
         rooms: 20,
-        rules: "pollen-v2",
+        rules: "swarm-social-v3",
+        currencies: ["SOL", "CICADAFARM", "ROBOTCYB"],
+        agentProtocol: "/agents.json",
       });
-    if (!allowed.has(request.headers.get("Origin")))
+    if (url.pathname === "/agents.json")
+      return Response.json({
+        protocol: "swarm-v3",
+        socket:
+          "wss://cicadafarm-swarm.dmitry-suh.workers.dev/?room=1&session=UUID&name=Agent&agent=1",
+        input: { type: "input", target: { x: 500, y: 270 } },
+        rate: 10,
+        world: ["width", "height", "homes", "players", "resources"],
+        rules:
+          "Server-authoritative, 12 players/room, 20 rooms. Agents are visibly labelled. Chat requires a signed wallet session. Agents may not purchase automatically.",
+      });
+    if (url.pathname.startsWith("/api/")) {
+      const origin = request.headers.get("Origin");
+      if (!allowed.has(origin))
+        return new Response("Origin denied", { status: 403 });
+      if (request.method === "OPTIONS")
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+            Vary: "Origin",
+          },
+        });
+      if (!["POST", "GET"].includes(request.method))
+        return new Response("Method denied", { status: 405 });
+      const response = await env.ACCOUNTS.get(
+        env.ACCOUNTS.idFromName("accounts"),
+      ).fetch(request);
+      const out = new Response(response.body, response);
+      out.headers.set("Access-Control-Allow-Origin", origin);
+      out.headers.set("Cache-Control", "no-store");
+      out.headers.set("Vary", "Origin");
+      return out;
+    }
+    if (
+      !allowed.has(request.headers.get("Origin")) &&
+      !(url.searchParams.get("agent") === "1" && !request.headers.get("Origin"))
+    )
       return new Response("Origin denied", { status: 403 });
     if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket")
       return new Response("WebSocket required", { status: 426 });
@@ -25,9 +68,12 @@ export default {
   },
 };
 export class Garden {
-  constructor(state) {
+  constructor(state, env) {
+    this.env = env;
+    this.chat = [];
+    this.chatRates = new Map();
     this.state = state;
-    this.world = new World();
+    this.world = new World(Math.random, { dynamic: true });
     this.connections = new Map();
     this.detached = new Map();
     this.timer = null;
@@ -46,6 +92,10 @@ export class Garden {
       country: u.searchParams.get("country"),
       color: u.searchParams.get("color"),
     });
+    if (p) {
+      p.agent = u.searchParams.get("agent") === "1";
+      p.cosmetic = null;
+    }
     if (!p) return new Response("Room full", { status: 409 });
     if (p.id === token) p.id = crypto.randomUUID();
     const old = this.connections.get(token);
@@ -60,11 +110,15 @@ export class Garden {
       messages: 0,
       window: Date.now(),
       lastInput: Date.now(),
+      wallet: null,
+      lastChat: 0,
+      authExpires: 0,
+      authenticating: false,
     };
     this.connections.set(token, entry);
     this.detached.delete(token);
-    server.addEventListener("message", (event) => {
-      if (typeof event.data !== "string" || event.data.length > 200) {
+    server.addEventListener("message", async (event) => {
+      if (typeof event.data !== "string" || event.data.length > 1000) {
         server.close(1008, "Invalid input");
         return;
       }
@@ -81,6 +135,86 @@ export class Garden {
       try {
         const msg = JSON.parse(event.data);
         if (msg.type === "input") this.world.input(token, msg.target);
+        if (
+          msg.type === "auth" &&
+          !entry.authenticating &&
+          typeof msg.token === "string" &&
+          /^[a-f0-9-]{72}$/.test(msg.token)
+        ) {
+          entry.authenticating = true;
+          try {
+            const r = await this.env.ACCOUNTS.get(
+              this.env.ACCOUNTS.idFromName("accounts"),
+            ).fetch(
+              new Request("https://internal/internal/session", {
+                headers: { Authorization: "Bearer " + msg.token },
+              }),
+            );
+            const auth = await r.json();
+            if (this.connections.get(token) !== entry) return;
+            if (!r.ok) {
+              entry.wallet = null;
+              entry.authExpires = 0;
+              p.cosmetic = null;
+              server.send(
+                JSON.stringify({
+                  type: "chat-error",
+                  error: "Wallet session expired",
+                }),
+              );
+              return;
+            }
+            entry.wallet = auth.wallet;
+            entry.authExpires = auth.expires;
+            p.cosmetic = auth.equipped;
+            server.send(
+              JSON.stringify({ type: "authenticated", wallet: auth.wallet }),
+            );
+          } finally {
+            entry.authenticating = false;
+          }
+        }
+        if (msg.type === "chat") {
+          if (!entry.wallet || entry.authExpires < Date.now()) {
+            server.send(
+              JSON.stringify({
+                type: "chat-error",
+                error: "Sign in with a wallet to chat",
+              }),
+            );
+            return;
+          }
+          if (now - (this.chatRates.get(entry.wallet) || 0) < 3000) {
+            server.send(
+              JSON.stringify({
+                type: "chat-error",
+                error: "Please wait 3 seconds between messages",
+              }),
+            );
+            return;
+          }
+          const text = cleanChat(msg.text);
+          if (!text) return;
+          entry.lastChat = now;
+          this.chatRates.set(entry.wallet, now);
+          for (const [wallet, time] of this.chatRates)
+            if (now - time > 60000) this.chatRates.delete(wallet);
+          const message = {
+            id: crypto.randomUUID(),
+            name: p.name,
+            agent: p.agent,
+            text,
+            time: now,
+          };
+          this.chat.push(message);
+          this.chat = this.chat.slice(-40);
+          this.sendAll({ type: "chat", message });
+        }
+        if (msg.type === "logout") {
+          entry.wallet = null;
+          entry.authExpires = 0;
+          p.cosmetic = null;
+        }
       } catch {
         server.close(1008, "Invalid JSON");
       }
@@ -98,6 +232,7 @@ export class Garden {
     server.addEventListener("close", cleanup);
     server.addEventListener("error", cleanup);
     server.send(JSON.stringify({ type: "welcome", id: p.id }));
+    server.send(JSON.stringify({ type: "chat-history", messages: this.chat }));
     this.broadcast();
     if (!this.timer) this.timer = setInterval(() => this.tick(), 100);
     return new Response(null, { status: 101, webSocket: client });
@@ -113,6 +248,13 @@ export class Garden {
       }
     this.world.step(0.1);
     this.broadcast();
+  }
+  sendAll(data) {
+    const text = JSON.stringify(data);
+    for (const { ws } of this.connections.values())
+      try {
+        ws.send(text);
+      } catch {}
   }
   broadcast() {
     const msg = JSON.stringify(this.world.snapshot());

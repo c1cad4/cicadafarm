@@ -1,3 +1,5 @@
+import { audioUI, sound } from "./audio.js";
+import { socialUI } from "./social.js";
 import { profileUI } from "./profile.js";
 import { drawScene } from "./renderer.js";
 import { flag } from "../multiplayer/profile.js";
@@ -268,6 +270,12 @@ for (const [l, v] of Object.entries({
   },
 }))
   Object.assign(text[l], v);
+text.en.tokens =
+  "Free to play. Wallet-signed room chat and optional permanent cosmetics paid in SOL, CICADAFARM or ROBOTCYB. No token rewards or paid gameplay advantage.";
+text.ru.tokens =
+  "Игра бесплатна. Чат — после подписи кошельком. Постоянные украшения оплачиваются в SOL, CICADAFARM или ROBOTCYB. Нет наград токенами или платного преимущества.";
+text["zh-CN"].tokens =
+  "免费游戏。钱包签名后可发言，可用 SOL、CICADAFARM 或 ROBOTCYB 购买永久装饰，无代币奖励或付费游戏优势。";
 const $ = (id) => document.getElementById(id),
   canvas = $("world"),
   ctx = canvas.getContext("2d"),
@@ -311,6 +319,8 @@ if (!/^[a-f0-9-]{36}$/.test(session || "")) {
   } catch {}
 }
 const profile = profileUI();
+audioUI();
+const social = socialUI(() => socket);
 let lastRespawn = 0;
 const room = new URLSearchParams(location.search).get("room");
 if (/^(?:[1-9]|1[0-9]|20)$/.test(room || "")) $("room").value = room;
@@ -348,7 +358,7 @@ function hud() {
   $("weather").textContent = t(C.weather(elapsed));
   $("level").textContent = String(C.level(sharedTotal)).padStart(2, "0");
   $("total").textContent =
-    `${sharedTotal} ${t("total")} · ${snapshot?.players.length || 0}/12`;
+    `${sharedTotal} ${t("total")} · ${snapshot?.players.length || 0}/12 · ${snapshot?.width || 1000} × ${snapshot?.height || 540} · ⌂ ${snapshot?.homes?.length || 1}`;
   $("hint").textContent =
     elapsed >= 180
       ? t("ended")
@@ -398,7 +408,10 @@ function join() {
     } catch {
       return;
     }
+    social.message(data);
     if (data.type === "welcome") {
+      social.ready();
+      sound("join");
       identity = data.id;
       state = "running";
       error = null;
@@ -407,12 +420,23 @@ function join() {
       return;
     }
     if (data.type === "world") {
+      const previous = snapshot?.players.find((p) => p.id === identity);
       snapshot = data;
       elapsed = data.elapsed;
       sharedTotal = data.total;
       const mine = data.players.find((p) => p.id === identity);
       if (mine) {
-        player = { ...mine, x: (mine.x * w) / 1000, y: (mine.y * h) / 540 };
+        if (previous) {
+          if (mine.respawns > previous.respawns) sound("respawn");
+          else if (mine.absorbed > previous.absorbed) sound("absorb");
+          else if (mine.score > previous.score) sound("bank");
+          else if (mine.mass > previous.mass) sound("pollen");
+        }
+        player = {
+          ...mine,
+          x: (mine.x * w) / (snapshot?.width || 1000),
+          y: (mine.y * h) / (snapshot?.height || 540),
+        };
         score = mine.score;
         cargo = mine.cargo;
         if (mine.respawns !== lastRespawn) {
@@ -424,17 +448,21 @@ function join() {
       }
       resources = data.resources.map((p) => ({
         ...p,
-        x: (p.x * w) / 1000,
-        y: (p.y * h) / 540,
+        x: (p.x * w) / (snapshot?.width || 1000),
+        y: (p.y * h) / (snapshot?.height || 540),
       }));
       thorns = data.thorns.map((p) => ({
         ...p,
-        x: (p.x * w) / 1000,
-        y: (p.y * h) / 540,
+        x: (p.x * w) / (snapshot?.width || 1000),
+        y: (p.y * h) / (snapshot?.height || 540),
       }));
       bots = data.players
         .filter((p) => p.id !== identity)
-        .map((p) => ({ ...p, x: (p.x * w) / 1000, y: (p.y * h) / 540 }));
+        .map((p) => ({
+          ...p,
+          x: (p.x * w) / (snapshot?.width || 1000),
+          y: (p.y * h) / (snapshot?.height || 540),
+        }));
       renderBoard(data.players);
       hud();
     }
@@ -466,6 +494,7 @@ function renderBoard(players) {
           flag(p.country) +
           " " +
           p.name +
+          (p.agent ? " [AI]" : "") +
           (p.id === identity ? ` (${t("you")})` : "");
         v.textContent = `${Math.round(p.mass || 20)} · ${t("mass")} / ${p.score} · ${t("harvest")}`;
         row.append(n, v);
@@ -524,7 +553,7 @@ canvas.addEventListener("pointerup", (e) => {
 });
 canvas.addEventListener("pointercancel", () => (target = null));
 window.addEventListener("keydown", (e) => {
-  if (e.target.closest("select,button,a,input")) return;
+  if (e.target.closest("select,button,a,input,textarea")) return;
   if (
     [
       "ArrowUp",
@@ -574,10 +603,16 @@ function draw(now) {
     identity,
     now,
     {
-      trail: trail.map((p) => ({ x: (p.x * 1000) / w, y: (p.y * 540) / h })),
+      trail: trail.map((p) => ({
+        x: (p.x * (snapshot?.width || 1000)) / w,
+        y: (p.y * (snapshot?.height || 540)) / h,
+      })),
       target:
         target && state === "running"
-          ? { x: (target.x * 1000) / w, y: (target.y * 540) / h }
+          ? {
+              x: (target.x * (snapshot?.width || 1000)) / w,
+              y: (target.y * (snapshot?.height || 540)) / h,
+            }
           : null,
       safeLabel: t("safe"),
     },
@@ -602,7 +637,12 @@ function loop(now) {
     socket.send(
       JSON.stringify({
         type: "input",
-        target: q ? { x: (q.x * 1000) / w, y: (q.y * 540) / h } : null,
+        target: q
+          ? {
+              x: (q.x * (snapshot?.width || 1000)) / w,
+              y: (q.y * (snapshot?.height || 540)) / h,
+            }
+          : null,
       }),
     );
     trail.unshift({ x: player.x, y: player.y });

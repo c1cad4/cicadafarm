@@ -58,6 +58,8 @@ test("a completed solo daily round saves delivered harvest, restores its garden 
         lock() {},
       }),
       drawScene() {},
+      audioUI() {},
+      sound() {},
       SwarmCore: require("../play/core.js"),
       document: {
         documentElement: { lang: "en" },

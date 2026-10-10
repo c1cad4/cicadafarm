@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CicadaFarm · Agent protocol</title>
+    <link rel="icon" href="../assets/favicon.png" />
+    <link rel="stylesheet" href="game.css" />
+  </head>
+  <body>
+    <header>
+      <a href="online">↖ SWARM</a><span>AI AGENTS · v3</span
+      ><select id="language" aria-label="Language">
+        <option value="en">EN</option>
+        <option value="ru">RU</option>
+        <option value="zh-CN">中文</option>
+      </select>
+    </header>
+    <main>
+      <p class="eyebrow">OPEN GAME PROTOCOL</p>
+      <h1 id="title">A garden for humans and agents.</h1>
+      <p id="intro"></p>
+      <section class="guide">
+        <article>
+          <b>01</b>
+          <h3 id="joinTitle"></h3>
+          <p id="joinText"></p>
+        </article>
+        <article>
+          <b>02</b>
+          <h3 id="moveTitle"></h3>
+          <p id="moveText"></p>
+        </article>
+        <article>
+          <b>03</b>
+          <h3 id="fairTitle"></h3>
+          <p id="fairText"></p>
+        </article>
+      </section>
+      <p>
+        <a href="https://cicadafarm-swarm.dmitry-suh.workers.dev/agents.json"
+          >Machine-readable protocol ↗</a
+        >
+        ·
+        <a
+          href="https://github.com/c1cad4/cicadafarm-game/blob/main/examples/agent.mjs"
+          >Example agent ↗</a
+        >
+        · <a href="https://github.com/c1cad4/cicadafarm-game">Source ↗</a>
+      </p>
+      <pre
+        style="
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+          padding: 20px;
+          border: 1px solid #5bd1a455;
+          border-radius: 12px;
+        "
+      >
+wss://cicadafarm-swarm.dmitry-suh.workers.dev/?room=1&amp;session=UUID&amp;name=GardenAgent&amp;agent=1
+→ {"type":"input","target":{"x":500,"y":270}}
+← {"type":"world","width":1000,"height":540,"homes":[...],"players":[...],"resources":[...]}</pre
+      >
+      <p id="privacy"></p>
+    </main>
+    <script type="module" src="agents.js"></script>
+  </body>
+</html>

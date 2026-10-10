@@ -1,3 +1,4 @@
+import { audioUI, sound } from "./audio.js";
 import { World, safe } from "../multiplayer/model.js";
 import { profileUI } from "./profile.js";
 import { drawScene } from "./renderer.js";
@@ -303,6 +304,7 @@ let width = 1000,
 const keys = new Set(),
   t = (k) => text[lang][k] || text.en[k] || k;
 const profile = profileUI();
+audioUI();
 $("mode").value =
   new URLSearchParams(location.search).get("daily") === "1" ? "daily" : "free";
 function save() {
@@ -539,16 +541,22 @@ function update(dt) {
     }
     world.input(b.id, q || null);
   }
+  const beforeMass = player.mass,
+    beforeAbsorbed = player.absorbed;
   world.step(dt);
+  if (player.absorbed > beforeAbsorbed) sound("absorb");
+  else if (player.mass > beforeMass) sound("pollen");
   trail.unshift({ x: player.x, y: player.y });
   if (trail.length > 130) trail.pop();
   if (player.respawns !== lastRespawn) {
     trail = [];
     target = null;
     lastRespawn = player.respawns;
+    sound("respawn");
     $("status").textContent = t("respawn");
   }
   if (player.score > lastScore) {
+    sound("bank");
     progress.total = Math.min(1e9, progress.total + player.score - lastScore);
     progress.best = Math.max(progress.best, player.score);
     lastScore = player.score;
