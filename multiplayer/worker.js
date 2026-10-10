@@ -12,6 +12,7 @@ export default {
         service: "CicadaFarm Swarm",
         capacity: 12,
         rooms: 20,
+        rules: "pollen-v2",
       });
     if (!allowed.has(request.headers.get("Origin")))
       return new Response("Origin denied", { status: 403 });
@@ -41,7 +42,10 @@ export class Garden {
       token = u.searchParams.get("session");
     if (!/^[a-f0-9-]{36}$/.test(token || ""))
       return new Response("Invalid session", { status: 400 });
-    const p = this.world.join(token, name(u.searchParams.get("name")));
+    const p = this.world.join(token, name(u.searchParams.get("name")), {
+      country: u.searchParams.get("country"),
+      color: u.searchParams.get("color"),
+    });
     if (!p) return new Response("Room full", { status: 409 });
     if (p.id === token) p.id = crypto.randomUUID();
     const old = this.connections.get(token);

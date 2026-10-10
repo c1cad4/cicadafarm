@@ -59,3 +59,9 @@ Robotcyb and CicadaFarm use the same portal renderer and local AI runtime. Autom
 ## Shared Garden multiplayer beta
 
 `play/online.html` connects to the separate `multiplayer/` Cloudflare Worker and SQLite-backed Durable Object. Twenty numbered rooms hold up to twelve players each. The server owns movement, harvesting and scores; clients send targets only. Rooms use 10 Hz snapshots, bounded input size/rate and a 30-second reconnect window while the instance remains active. No permanent player accounts, cross-restart recovery, purchases or global rankings. Nicknames are public to room participants; no chat or wallet connection. Active simulations consume Durable Object duration quota. Hidden clients stop sending input and are disconnected after 60 seconds; idle rooms stop their timer. The first production deployment uses the Cloudflare dashboard, not GitHub automatic Worker builds. Deploy the Worker from `multiplayer/` using `npx wrangler deploy`.
+
+## Pollen growth update
+
+Both modes share the authoritative `multiplayer/model.js` rules: pollen increases mass, rare purple nectar is worth five, larger cicadas move more slowly, and a cicada at least 25% heavier can absorb a smaller one outside the safe farm. Respawn grants a five-second shield and keeps delivered harvest; thorns spill cargo and reduce mass. Nicknames, ISO country flags and hex colours are validated on the server. Player growth and absorption are never supplied by the client.
+
+Solo mode includes three banked-harvest goals, a lasting garden on this browser and a UTC daily map with a fixed random seed and simulation step. Screen resizing does not change the map. Daily results are local, unverified scores and can be copied after a completed round. The personal garden is saved at each deposit; clearing browser storage removes it. Multiplayer room progress remains temporary and no token purchases or redeemable rewards are enabled.

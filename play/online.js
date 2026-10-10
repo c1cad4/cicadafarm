@@ -1,4 +1,7 @@
-"use strict";
+import { profileUI } from "./profile.js";
+import { drawScene } from "./renderer.js";
+import { flag } from "../multiplayer/profile.js";
+("use strict");
 const text = {
   en: {
     eyebrow: "A SMALL SWARM. A LIVING WORLD.",
@@ -211,6 +214,60 @@ const additions = {
   },
 };
 for (const l of Object.keys(text)) Object.assign(text[l], additions[l]);
+for (const [l, v] of Object.entries({
+  en: {
+    mass: "POLLEN MASS",
+    safe: "SAFE FARM",
+    hint: "Collect pollen, grow and absorb smaller cicadas • the farm is safe",
+    full: "Cargo full — pollen still grows your cicada. Return to bank it!",
+    instructions:
+      "Choose your nickname, flag and colour. Collect pollen to grow. A cicada at least 25% heavier can absorb a smaller one outside the safe farm. Purple nectar is worth 5; thorns reduce mass. Respawn preserves banked harvest.",
+    collectDesc:
+      "Pollen grows your cicada. Purple nectar is worth 5. Bigger cicadas are slower, so smaller players can escape.",
+    deliverDesc:
+      "Deliver at the central farm. Inside its green circle, everyone is protected from absorption. Banked harvest survives respawn.",
+    growDesc:
+      "Grow the shared garden with banked harvest. Choose when to gather, bank or chase. Rain replenishes pollen; drought slows movement.",
+    respawn: "Respawned — banked harvest preserved.",
+    shield: "Respawn protection",
+    total: "harvest banked",
+  },
+  ru: {
+    mass: "МАССА ПЫЛЬЦЫ",
+    safe: "БЕЗОПАСНАЯ ФЕРМА",
+    hint: "Собирай пыльцу, расти и поглощай меньших цикад • на ферме безопасно",
+    full: "Груз полон — пыльца продолжает увеличивать цикаду. Доставь урожай!",
+    instructions:
+      "Выбери имя, флаг и цвет. Пыльца увеличивает цикаду. За пределами безопасной фермы цикада минимум на 25% тяжелее может поглотить меньшую. Фиолетовый нектар стоит 5; колючки уменьшают массу. Доставленный урожай сохраняется после возрождения.",
+    collectDesc:
+      "Пыльца увеличивает цикаду. Фиолетовый нектар стоит 5. Большие цикады медленнее — маленькие могут убежать.",
+    deliverDesc:
+      "Доставляй урожай на ферму в центре. Зелёный круг защищает всех от поглощения. Доставленный урожай сохраняется после возрождения.",
+    growDesc:
+      "Общий сад растёт от доставленного урожая. Выбирай: собирать, доставлять или догонять. Дождь пополняет пыльцу, засуха замедляет движение.",
+    respawn: "Ты возродился — доставленный урожай сохранён.",
+    shield: "Защита после возрождения",
+    total: "урожая доставлено",
+  },
+  "zh-CN": {
+    mass: "花粉质量",
+    safe: "安全农场",
+    hint: "收集花粉，成长并吸收较小的蝉 · 农场内安全",
+    full: "载荷已满，花粉仍使蝉成长。返回农场交付！",
+    instructions:
+      "选择昵称、国旗和颜色。花粉使蝉成长。安全农场外，质量至少多25%的蝉可以吸收较小的蝉。紫色花蜜价值5，荆棘减少质量。重生保留已交付收获。",
+    collectDesc:
+      "花粉使蝉成长。紫色花蜜价值5。较大的蝉移动更慢，小蝉可以逃跑。",
+    deliverDesc:
+      "向中央农场交付收获。绿色圆圈保护所有玩家免于吸收，重生保留已交付收获。",
+    growDesc:
+      "交付收获培育共享花园。选择收集、交付或追逐。雨水补充花粉，干旱减慢移动。",
+    respawn: "已重生，交付收获保留。",
+    shield: "重生保护",
+    total: "已交付收获",
+  },
+}))
+  Object.assign(text[l], v);
 const $ = (id) => document.getElementById(id),
   canvas = $("world"),
   ctx = canvas.getContext("2d"),
@@ -253,6 +310,8 @@ if (!/^[a-f0-9-]{36}$/.test(session || "")) {
     sessionStorage.setItem("swarmSession", session);
   } catch {}
 }
+const profile = profileUI();
+let lastRespawn = 0;
 const room = new URLSearchParams(location.search).get("room");
 if (/^(?:[1-9]|1[0-9]|20)$/.test(room || "")) $("room").value = room;
 function translate() {
@@ -280,6 +339,7 @@ function overlay() {
   $("start").disabled = state === "connecting";
 }
 function hud() {
+  $("mass").textContent = Math.round(player.mass || 20);
   $("cargo").textContent = `${cargo} / 20`;
   $("score").textContent = score;
   const remain = Math.max(0, Math.ceil(180 - elapsed));
@@ -290,10 +350,16 @@ function hud() {
   $("total").textContent =
     `${sharedTotal} ${t("total")} · ${snapshot?.players.length || 0}/12`;
   $("hint").textContent =
-    elapsed >= 180 ? t("ended") : cargo === 20 ? t("full") : t("hint");
+    elapsed >= 180
+      ? t("ended")
+      : player.shield > 0
+        ? `${t("shield")}: ${Math.ceil(player.shield)}s`
+        : cargo === 20
+          ? t("full")
+          : t("hint");
   $("pause").disabled = state !== "running";
   $("room").disabled = state === "running" || state === "connecting";
-  $("nickname").disabled = $("room").disabled;
+  profile.lock($("room").disabled);
 }
 function join() {
   if (socket) socket.close();
@@ -309,6 +375,9 @@ function join() {
   u.protocol = u.protocol === "http:" ? "ws:" : "wss:";
   u.searchParams.set("room", $("room").value);
   u.searchParams.set("name", $("nickname").value || "Cicada");
+  const style = profile.value();
+  u.searchParams.set("country", style.country);
+  u.searchParams.set("color", style.color);
   u.searchParams.set("session", session);
   const ws = new WebSocket(u);
   socket = ws;
@@ -346,6 +415,12 @@ function join() {
         player = { ...mine, x: (mine.x * w) / 1000, y: (mine.y * h) / 540 };
         score = mine.score;
         cargo = mine.cargo;
+        if (mine.respawns !== lastRespawn) {
+          lastRespawn = mine.respawns;
+          target = null;
+          trail = [];
+          $("status").textContent = t("respawn");
+        }
       }
       resources = data.resources.map((p) => ({
         ...p,
@@ -382,13 +457,17 @@ function join() {
 function renderBoard(players) {
   $("leaderboard").replaceChildren(
     ...[...players]
-      .sort((a, b) => b.score - a.score)
+      .sort((a, b) => (b.mass || 20) - (a.mass || 20) || b.score - a.score)
       .map((p) => {
         const row = document.createElement("article"),
           n = document.createElement("strong"),
           v = document.createElement("p");
-        n.textContent = p.name + (p.id === identity ? ` (${t("you")})` : "");
-        v.textContent = `${p.score} · ${t("harvest")}`;
+        n.textContent =
+          flag(p.country) +
+          " " +
+          p.name +
+          (p.id === identity ? ` (${t("you")})` : "");
+        v.textContent = `${Math.round(p.mass || 20)} · ${t("mass")} / ${p.score} · ${t("harvest")}`;
         row.append(n, v);
         return row;
       }),
@@ -485,125 +564,24 @@ function resize() {
   target = null;
 }
 new ResizeObserver(resize).observe(canvas);
-function circle(x, y, r, color) {
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fillStyle = color;
-  ctx.fill();
-}
-function cicada(p, color, size = 1) {
-  ctx.save();
-  ctx.translate(p.x, p.y);
-  ctx.rotate(p.angle);
-  ctx.scale(size, size);
-  ctx.fillStyle = color;
-  ctx.globalAlpha = 0.5;
-  for (const side of [-1, 1]) {
-    ctx.beginPath();
-    ctx.ellipse(-2, side * 8, 12, 5, side * 0.35, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.ellipse(0, 0, 10, 4, 0, 0, Math.PI * 2);
-  ctx.fill();
-  circle(7, 0, 4, "#e6ffe0");
-  ctx.restore();
-}
 function draw(now) {
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.fillStyle = "#091b13";
-  ctx.fillRect(0, 0, w, h);
-  ctx.strokeStyle = "#244632";
-  ctx.lineWidth = 0.5;
-  for (let x = 0; x < w; x += 42) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, h);
-    ctx.stroke();
-  }
-  for (let y = 0; y < h; y += 42) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(w, y);
-    ctx.stroke();
-  }
-  const cx = w / 2,
-    cy = h / 2;
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, 75*w/1000, 75*h/540, 0, 0, Math.PI*2);
-  ctx.fillStyle="#20432b";ctx.fill();
-  ctx.strokeStyle = flash ? "#efffc1" : "#97dc76";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, 57*w/1000, 57*h/540, 0, 0, Math.PI*2);
-  ctx.stroke();
-  const trees = Math.min(18, 4 + C.level(sharedTotal) * 2);
-  for (let i = 0; i < trees; i++) {
-    const a = i * 2.399,
-      r = 24 + (i % 3) * 9;
-    circle(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 7, "#416e38");
-    circle(cx + Math.cos(a) * r - 2, cy + Math.sin(a) * r - 2, 4, "#a0d575");
-  }
-  ctx.fillStyle = "#e1e4a5";
-  ctx.fillRect(cx - 12, cy - 6, 24, 18);
-  ctx.fillStyle = "#cf995b";
-  ctx.beginPath();
-  ctx.moveTo(cx - 17, cy - 6);
-  ctx.lineTo(cx, cy - 21);
-  ctx.lineTo(cx + 17, cy - 6);
-  ctx.fill();
-  ctx.font = "10px system-ui";
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#d5e8b7";
-  ctx.fillText(t("farm"), cx, cy + 94);
-  for (const p of thorns) {
-    ctx.save();
-    ctx.translate(p.x, p.y);
-    ctx.rotate(Math.PI / 4);
-    ctx.fillStyle = "#b66b67";
-    ctx.fillRect(-6, -6, 12, 12);
-    ctx.restore();
-  }
-  const colors = ["#dbeb90", "#ffc17b", "#79e4e2"];
-  for (const p of resources) {
-    circle(p.x, p.y, 8, colors[p.kind] + "18");
-    circle(p.x, p.y, 3.5, colors[p.kind]);
-  }
-  for (let i = cargo - 1; i >= 0; i--) {
-    const p = trail[Math.min(trail.length - 1, (i + 1) * 5)];
-    if (p) circle(p.x, p.y, 3, colors[i % 3]);
-  }
-  for (const b of bots) {
-    cicada(b, "#68adc7", 1);
-    ctx.fillStyle = "#dceff5";
-    ctx.fillText(b.name, b.x, b.y - 18);
-  }
-  cicada(player, hit ? "#ef9292" : "#c8ff91", 1.3);
-  const weather = C.weather(elapsed);
-  if (weather === "rain") {
-    ctx.strokeStyle = "#9bd9ed44";
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 35; i++) {
-      let x = (i * 77 + now * 0.04) % w,
-        y = (i * 113 + now * 0.17) % h;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x - 3, y + 12);
-      ctx.stroke();
-    }
-  }
-  if (weather === "dry") {
-    ctx.fillStyle = "#b7852910";
-    ctx.fillRect(0, 0, w, h);
-  }
-  if (target && state === "running") {
-    ctx.strokeStyle = "#d4ff8155";
-    ctx.beginPath();
-    ctx.arc(target.x, target.y, 8, 0, 7);
-    ctx.stroke();
-  }
+  drawScene(
+    ctx,
+    w,
+    h,
+    dpr,
+    snapshot || { players: [], resources: [], thorns: [], elapsed: 0 },
+    identity,
+    now,
+    {
+      trail: trail.map((p) => ({ x: (p.x * 1000) / w, y: (p.y * 540) / h })),
+      target:
+        target && state === "running"
+          ? { x: (target.x * 1000) / w, y: (target.y * 540) / h }
+          : null,
+      safeLabel: t("safe"),
+    },
+  );
 }
 function loop(now) {
   if (

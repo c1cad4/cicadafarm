@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="game.css" />
     <script defer src="core.js"></script>
     <script defer src="fullscreen.js"></script>
-    <script defer src="online.js"></script>
+    <script type="module" src="online.js"></script>
   </head>
   <body>
     <header>
@@ -35,6 +35,9 @@
       <section class="arena">
         <canvas id="world" aria-label="CicadaFarm game arena"></canvas>
         <div class="hud">
+          <div>
+            <small data-text="mass"></small><strong id="mass">20</strong>
+          </div>
           <div>
             <small data-text="cargo"></small><strong id="cargo">0 / 20</strong>
           </div>
@@ -75,7 +78,11 @@
             <option value="18">18</option>
             <option value="19">19</option>
             <option value="20">20</option></select
-          ><button id="invite">Invite ↗</button
+          ><label id="countryLabel" for="country">Flag</label
+          ><select id="country"></select
+          ><label id="colorLabel" for="color">Colour</label
+          ><input type="color" id="color" value="#c8ff91" /><button id="invite">
+            Invite ↗</button
           ><a href="./" id="soloLink">Solo ↗</a>
         </aside>
         <div id="overlay">
@@ -87,7 +94,10 @@
           </div>
         </div>
         <div class="bottom">
-          <span id="hint"></span><button id="fullscreen" type="button" aria-pressed="false">⛶ Full screen</button><button id="pause" data-text="pause"></button>
+          <span id="hint"></span
+          ><button id="fullscreen" type="button" aria-pressed="false">
+            ⛶ Full screen</button
+          ><button id="pause" data-text="pause"></button>
         </div>
       </section>
       <section class="guide">
