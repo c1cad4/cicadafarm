@@ -7,18 +7,27 @@
 <meta name="theme-color" content="#020504">
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/cicada-logo-256.png">
-<script defer src="assets/runtime.js?v=20261010-impact-r1"></script>
-<script defer src="assets/robot-mind.js?v=20261010-impact-r1"></script>
-<script defer src="assets/ecosystem.js?v=20261010-impact-r1"></script>
-<script defer src="assets/experience.js?v=20261010-impact-r1"></script>
-<script defer src="assets/market-core.js?v=20261010-impact-r1"></script>
-<script defer src="assets/app.js?v=20261010-impact-r1"></script>
+<script defer src="assets/runtime.js?v=20261010-languages-r1"></script>
+<script defer src="assets/robot-mind.js?v=20261010-languages-r1"></script>
+<script defer src="assets/ecosystem.js?v=20261010-languages-r1"></script>
+<script defer src="assets/experience.js?v=20261010-languages-r1"></script>
+<script defer src="assets/market-core.js?v=20261010-languages-r1"></script>
+<script defer src="assets/app.js?v=20261010-languages-r1"></script>
 <title>CicadaFarm — Living Farm</title>
-<link rel="stylesheet" href="assets/site.css?v=20261010-impact-r1">
-<link rel="stylesheet" href="assets/ecosystem.css?v=20261010-impact-r1">
+<link rel="stylesheet" href="assets/site.css?v=20261010-languages-r1">
+<link rel="stylesheet" href="assets/ecosystem.css?v=20261010-languages-r1">
 <script defer src="assets/qrcode.min.js?v=1.0.0"></script>
-<script defer src="assets/market.js?v=20261010-impact-r1"></script>
-<script defer src="assets/impact.js?v=20261010-impact-r1"></script>
+<script defer src="assets/market.js?v=20261010-languages-r1"></script>
+<script defer src="assets/impact.js?v=20261010-languages-r1"></script>
+<script defer src="assets/locales.js?v=20261010-languages-r1"></script>
+<script defer src="assets/i18n.js?v=20261010-languages-r1"></script>
+<link rel="canonical" href="https://c1cad4.github.io/cicadafarm/">
+<link rel="alternate" hreflang="en" href="https://c1cad4.github.io/cicadafarm/?lang=en">
+<link rel="alternate" hreflang="ru" href="https://c1cad4.github.io/cicadafarm/?lang=ru">
+<link rel="alternate" hreflang="zh-CN" href="https://c1cad4.github.io/cicadafarm/?lang=zh-CN">
+<link rel="alternate" type="application/json" href="data/catalog.json" title="CicadaFarm catalogue">
+<link rel="alternate" type="text/plain" href="llms.txt" title="Agent content index">
+<script id="farmSchema" type="application/ld+json">{"@context":"https://schema.org","@type":"OfferCatalog","name":"CicadaFarm published catalogue","url":"https://c1cad4.github.io/cicadafarm/agents/","itemListElement":[{"@type":"Offer","url":"https://c1cad4.github.io/cicadafarm/","price":30,"priceCurrency":"USD","description":"Merchant-published stock; confirm availability and delivery before payment. Shipping excluded.","priceSpecification":{"@type":"UnitPriceSpecification","price":30,"priceCurrency":"USD","referenceQuantity":{"@type":"QuantitativeValue","value":1,"unitText":"kg"}},"itemOffered":{"@type":"Product","name":"IVAN TEA","identifier":"tea"}},{"@type":"Offer","url":"https://c1cad4.github.io/cicadafarm/","price":50,"priceCurrency":"USD","description":"Merchant-published stock; confirm availability and delivery before payment. Shipping excluded.","priceSpecification":{"@type":"UnitPriceSpecification","price":50,"priceCurrency":"USD","referenceQuantity":{"@type":"QuantitativeValue","value":1,"unitText":"kg"}},"itemOffered":{"@type":"Product","name":"CEDAR NUTS","identifier":"nuts"}},{"@type":"Offer","url":"https://c1cad4.github.io/cicadafarm/","price":120,"priceCurrency":"USD","description":"Merchant-published stock; confirm availability and delivery before payment. Shipping excluded.","priceSpecification":{"@type":"UnitPriceSpecification","price":120,"priceCurrency":"USD","referenceQuantity":{"@type":"QuantitativeValue","value":1,"unitText":"L"}},"itemOffered":{"@type":"Product","name":"FARM HONEY","identifier":"honey"}},{"@type":"Offer","url":"https://c1cad4.github.io/cicadafarm/","price":1,"priceCurrency":"USD","description":"Merchant-published stock; confirm availability and delivery before payment. Shipping excluded.","priceSpecification":{"@type":"UnitPriceSpecification","price":1,"priceCurrency":"USD","referenceQuantity":{"@type":"QuantitativeValue","value":1,"unitText":"eggs"}},"itemOffered":{"@type":"Product","name":"FARM EGGS","identifier":"eggs"}},{"@type":"Offer","url":"https://c1cad4.github.io/cicadafarm/","price":5000,"priceCurrency":"USD","description":"Merchant-published stock; confirm availability and delivery before payment. Shipping excluded. Four hives shared across both rental terms.","priceSpecification":{"@type":"UnitPriceSpecification","price":5000,"priceCurrency":"USD","referenceQuantity":{"@type":"QuantitativeValue","value":1,"unitText":"rental"}},"itemOffered":{"@type":"Service","name":"HIVE · 2 YEARS","identifier":"hive2"}},{"@type":"Offer","url":"https://c1cad4.github.io/cicadafarm/","price":10000,"priceCurrency":"USD","description":"Merchant-published stock; confirm availability and delivery before payment. Shipping excluded. Four hives shared across both rental terms.","priceSpecification":{"@type":"UnitPriceSpecification","price":10000,"priceCurrency":"USD","referenceQuantity":{"@type":"QuantitativeValue","value":1,"unitText":"rental"}},"itemOffered":{"@type":"Service","name":"HIVE · 3 YEARS","identifier":"hive3"}}]}</script>
 </head>
 <body>
 <div class="app">
@@ -41,7 +50,7 @@
 <div class="ui">
 <header class="topbar">
   <a class="brand" href="./" aria-label="CicadaFarm home"><img src="assets/cicada-logo-256.png" alt="" width="42" height="42"><span><b>CICADAFARM</b><small>living farm • explore • participate</small></span></a>
-<a class="robot-portal ecosystem-portal" href="https://robotcyb.ai/?from=cicadafarm&amp;portalv=20261010-r2" data-star-portal data-world="ROBOTCYB"><span class="portal-ring">✧</span><span>ROBOTCYB<small>one ecosystem · enter portal ↗</small></span></a></header>
+<a class="robot-portal ecosystem-portal" href="https://robotcyb.ai/?from=cicadafarm&amp;portalv=20261010-r2" data-star-portal data-world="ROBOTCYB"><span class="portal-ring">✧</span><span>ROBOTCYB<small>one ecosystem · enter portal ↗</small></span></a><label class="language-picker"><span class="sr-only">Language</span><select data-language aria-label="Language" data-i18n-skip><option value="en">EN</option><option value="ru">RU</option><option value="zh-CN">中文</option></select></label></header>
 
 <!-- Orbital navigation: the interface is a constellation, not a toolbar. -->
 <nav class="orbital-nav" aria-label="CicadaFarm navigation">
@@ -111,7 +120,7 @@
  <div class="card">
    <button class="close" aria-label="Close" onclick="toggleRobot()">×</button>
    <b style="color:#7dffbd">ROBOTCYB</b>
-   <div id="robotMsg" style="margin-top:8px;font-size:11px">I am Robotcyb, your farm companion. Ask about the farm in English or Russian. The small AI loads automatically in the background (Russian and English). Ask while it warms up; the project guide is always available.</div>
+   <div id="robotMsg" style="margin-top:8px;font-size:11px">I am Robotcyb, your farm companion. Ask about the farm in English, Russian or Chinese. The small AI loads automatically in the background. The project guide remains available while it loads.</div>
    <div class="ai-tools"><button id="loadAI" onclick="RobotMind.load()">RETRY AI</button><button onclick="RobotMind.stop()">STOP AI</button><small id="aiStatus" role="status">AI warming up · ~300 MB · WebGPU required</small></div><input id="robotInput" placeholder="Ask ROBOTCYB..." onkeydown="if(event.key==='Enter')askRobot()">
    <button class="primary" onclick="askRobot()">ASK</button>
  </div>
@@ -124,6 +133,7 @@
 </div>
 
 
+<a class="agent-version" href="agents/">Agent-readable version ↗</a>
 <noscript><div class="no-script">Enable JavaScript to explore the farm.</div></noscript>
 </body>
 </html>

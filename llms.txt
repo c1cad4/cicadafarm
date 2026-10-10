@@ -1,0 +1,18 @@
+# CicadaFarm
+
+> A physical-farm project with an interactive digital twin, a manually confirmed token-payment shop and a shared ecosystem with Robotcyb. English, Russian and Simplified Chinese interfaces are available.
+
+Goods have fixed USD prices, payable in the CICADAFARM SPL token using a fresh GeckoTerminal pool rate. Stock is merchant-published and must be confirmed with the farm before payment; a transfer does not reserve inventory. Shipping is separate, and eggs are farm pickup only. Four rental hives are shared across both rental terms.
+
+Farm-impact figures and seasonal weather are illustrative estimates, not verified production or live weather measurements. Wildlife entries are sightings, not population counts. Personal records stay on visitor devices. Farm and wildlife locations are private and are not published.
+
+## Project and ordering
+
+- [Agent-readable English](https://c1cad4.github.io/cicadafarm/agents/): Static HTML with product prices, stock, payment workflow and data quality.
+- [Agent-readable Russian](https://c1cad4.github.io/cicadafarm/agents/ru.html): Russian version of the same facts.
+- [Agent-readable Chinese](https://c1cad4.github.io/cicadafarm/agents/zh.html): Simplified Chinese version of the same facts.
+- [JSON catalogue](https://c1cad4.github.io/cicadafarm/data/catalog.json): Prices, units, shared inventory, token mint, receiver wallet, rate source and capability limits.
+- [Schema.org catalogue](https://c1cad4.github.io/cicadafarm/data/catalog.schema.json): Structured offers with fixed USD unit prices.
+- [Interactive farm](https://c1cad4.github.io/cicadafarm/): Human interface with animated farm, local AI and Solana Pay checkout.
+- [Robotcyb](https://robotcyb.ai/): Other site in the same ecosystem, with its own separate token.
+- [Order contact](https://t.me/robot_cyb): Confirm inventory and delivery with the farm before payment.

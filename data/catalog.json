@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "updated": "2026-10-10",
+  "project": "CicadaFarm",
+  "website": "https://c1cad4.github.io/cicadafarm/",
+  "ecosystemWebsite": "https://robotcyb.ai/",
+  "languages": [
+    "en",
+    "ru",
+    "zh-CN"
+  ],
+  "inventoryType": "merchant_published_manual_confirmation_required",
+  "sharedStock": {
+    "hives-shared": 4
+  },
+  "products": [
+    {
+      "id": "tea",
+      "name": {
+        "en": "IVAN TEA",
+        "ru": "ИВАН-ЧАЙ",
+        "zh-CN": "柳兰茶"
+      },
+      "usdPrice": 30,
+      "priceUnit": "kg",
+      "publishedStock": 50,
+      "stockGroup": "tea",
+      "sizes": [
+        {
+          "label": "50 g",
+          "baseUnits": 0.05
+        },
+        {
+          "label": "100 g",
+          "baseUnits": 0.1
+        },
+        {
+          "label": "250 g",
+          "baseUnits": 0.25
+        },
+        {
+          "label": "1 kg",
+          "baseUnits": 1
+        }
+      ],
+      "delivery": "confirm_with_farm"
+    },
+    {
+      "id": "nuts",
+      "name": {
+        "en": "CEDAR NUTS",
+        "ru": "КЕДРОВЫЕ ОРЕШКИ",
+        "zh-CN": "松子"
+      },
+      "usdPrice": 50,
+      "priceUnit": "kg",
+      "publishedStock": 300,
+      "stockGroup": "nuts",
+      "sizes": [
+        {
+          "label": "250 g",
+          "baseUnits": 0.25
+        },
+        {
+          "label": "500 g",
+          "baseUnits": 0.5
+        },
+        {
+          "label": "1 kg",
+          "baseUnits": 1
+        }
+      ],
+      "delivery": "confirm_with_farm"
+    },
+    {
+      "id": "honey",
+      "name": {
+        "en": "FARM HONEY",
+        "ru": "ФЕРМЕРСКИЙ МЁД",
+        "zh-CN": "农场蜂蜜"
+      },
+      "usdPrice": 120,
+      "priceUnit": "L",
+      "publishedStock": 100,
+      "stockGroup": "honey",
+      "sizes": [
+        {
+          "label": "250 ml",
+          "baseUnits": 0.25
+        },
+        {
+          "label": "500 ml",
+          "baseUnits": 0.5
+        },
+        {
+          "label": "1 L",
+          "baseUnits": 1
+        }
+      ],
+      "delivery": "international_post_quote_separately"
+    },
+    {
+      "id": "eggs",
+      "name": {
+        "en": "FARM EGGS",
+        "ru": "ФЕРМЕРСКИЕ ЯЙЦА",
+        "zh-CN": "农场鸡蛋"
+      },
+      "usdPrice": 1,
+      "priceUnit": "eggs",
+      "publishedStock": 100,
+      "stockGroup": "eggs",
+      "sizes": [
+        {
+          "label": "6 eggs",
+          "baseUnits": 6
+        },
+        {
+          "label": "10 eggs",
+          "baseUnits": 10
+        },
+        {
+          "label": "20 eggs",
+          "baseUnits": 20
+        }
+      ],
+      "delivery": "farm_pickup_only"
+    },
+    {
+      "id": "hive2",
+      "name": {
+        "en": "HIVE · 2 YEARS",
+        "ru": "УЛЕЙ · 2 ГОДА",
+        "zh-CN": "蜂箱 · 2 年"
+      },
+      "usdPrice": 5000,
+      "priceUnit": "rental",
+      "publishedStock": 4,
+      "stockGroup": "hives-shared",
+      "sizes": [
+        {
+          "label": "2 years",
+          "baseUnits": 1
+        }
+      ],
+      "delivery": "confirm_with_farm"
+    },
+    {
+      "id": "hive3",
+      "name": {
+        "en": "HIVE · 3 YEARS",
+        "ru": "УЛЕЙ · 3 ГОДА",
+        "zh-CN": "蜂箱 · 3 年"
+      },
+      "usdPrice": 10000,
+      "priceUnit": "rental",
+      "publishedStock": 4,
+      "stockGroup": "hives-shared",
+      "sizes": [
+        {
+          "label": "3 years",
+          "baseUnits": 1
+        }
+      ],
+      "delivery": "confirm_with_farm"
+    }
+  ],
+  "payment": {
+    "network": "solana-mainnet",
+    "mint": "9QLCEL7Xo9VTwgBeAYU1PWX7JJ8joKxQCYw3msjUpump",
+    "recipientWallet": "AHBz386tP36ZrABN7STzxV66u1f7CwnaqrFBnevb4ff8",
+    "tokenDecimals": 6,
+    "usdAnchor": true,
+    "tokenAmountFormula": "ceil(usdGoodsTotal / tokenPriceUSD * 10^6) / 10^6",
+    "pool": "4155gZUL9omQeB8zyaTrEtxAGqzj1Bmn7szxX2n7tMii",
+    "livePriceSource": "https://api.geckoterminal.com/api/v2/networks/solana/pools/4155gZUL9omQeB8zyaTrEtxAGqzj1Bmn7szxX2n7tMii",
+    "quoteValiditySeconds": 300,
+    "checkoutRefreshSeconds": 30,
+    "shippingIncluded": false,
+    "stockReservedByTransfer": false,
+    "orderConfirmation": "manual",
+    "receiptContact": "https://t.me/robot_cyb"
+  },
+  "impact": {
+    "status": "illustrative_estimates_not_verified_measurements",
+    "personalObservations": "buyer_device_only_not_public",
+    "weather": "seasonal_examples_not_current_weather",
+    "wildlife": "sightings_not_population_counts"
+  },
+  "privacy": {
+    "farmLocationPublished": false
+  },
+  "capabilities": {
+    "readCatalog": true,
+    "createServerOrder": false,
+    "reserveGlobalInventory": false,
+    "automaticTelegramNotifications": false
+  }
+}

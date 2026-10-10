@@ -4,7 +4,8 @@
   "version": "5.6.1",
   "scripts": {
     "test": "node --test tests/*.test.cjs",
-    "check": "node --check assets/app.js && node --check assets/runtime.js && node --check assets/experience.js && node --check assets/robot-mind.js && node --check assets/ecosystem.js && node --check assets/market-core.js && node --check assets/market.js && node --check assets/impact.js",
-    "start": "python3 -m http.server 8000 --bind 127.0.0.1"
+    "check": "node --check assets/app.js && node --check assets/runtime.js && node --check assets/experience.js && node --check assets/robot-mind.js && node --check assets/ecosystem.js && node --check assets/market-core.js && node --check assets/market.js && node --check assets/impact.js && node --check assets/i18n.js && node --check assets/locales.js",
+    "start": "python3 -m http.server 8000 --bind 127.0.0.1",
+    "build:agents": "node scripts/build-agent-pages.cjs"
   }
 }

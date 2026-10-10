@@ -185,13 +185,13 @@ function animalSound(type){
 function openAnimalRoom(title,icon,count,type){
  animalSound(type);
  const soundLabel={duck:"ducks",goose:"geese",turkey:"turkeys",chicken:"chickens",goat:"goats"}[type]||"animals";
- show(`<h2>${icon} ${title}</h2><p class="muted">${count}. Click feeding или open будущую camera.</p>
+ show(`<h2>${icon} ${title}</h2><p class="muted">${count}. Click feeding or open the future camera module.</p>
  <div class="camera"><div class="scan"></div><b>📹 LIVE CAMERA</b></div>
  <div class="grid"><div class="tile"><b>${count}</b><small>animals</small></div><div class="tile"><b>LIVE</b><small>camera module</small></div><div class="tile"><b>🔊</b><small>${soundLabel} sound</small></div></div>
  <div class="actions"><button onclick="animalSound('${type}')">🔊 Sound</button><button onclick="feed('${title}')">🥕 Feed</button><button onclick="openPanel('camera')">📹 Video</button></div>
  <p class="muted">This is a camera demo. A real IP/ESP32-CAM camera can be connected here.</p>`);
 }
-function feed(name){alert("Action: feed "+name+". Next stage — verification balance/token и blockchain transaction.");}
+function feed(name){alert("Action: feed "+name+". Feeding is a demo; no token payment is taken.");}
 function openSector(title,text,icon){
  let extra="";
  if(title==="Bee Land") extra=`<div class="actions"><button onclick="openPanel('hives')">🍯 Rental hive</button><button onclick="openPanel('camera')">📹 Cameras</button></div>`;
@@ -201,8 +201,8 @@ const cybChatState={peer:"FARM NODE",messages:readChat(),mesh:false};
 function cybChatSave(){cybChatState.messages=cybChatState.messages.slice(-80);farmStore.setItem("cybchatMessages",JSON.stringify(cybChatState.messages.slice(-80)));}
 function cybChatRender(){
  const el=document.getElementById("cybchatMessages");if(!el)return;
- if(!cybChatState.messages.length){el.innerHTML='<div class="cyb-msg"><b>CYBCHAT</b><br>Secure farm communication layer initialized.<span class="meta">LOCAL SESSION · NO SERVER CLAIM</span></div>';return;}
- el.innerHTML=cybChatState.messages.map(m=>'<div class="cyb-msg '+(m.me?'me':'')+'"><b>'+escapeHtml(m.from)+'</b><br>'+escapeHtml(m.text)+'<span class="meta">'+escapeHtml(m.transport||'LOCAL')+' · '+new Date(m.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'</span></div>').join('');el.scrollTop=el.scrollHeight;
+ if(!cybChatState.messages.length){el.innerHTML='<div class="cyb-msg"><b>CYBCHAT</b><br>'+escapeHtml(window.FarmI18n?.t('Secure farm communication layer initialized.')||'Secure farm communication layer initialized.')+'<span class="meta">'+escapeHtml(window.FarmI18n?.t('LOCAL SESSION · NO SERVER CLAIM')||'LOCAL SESSION · NO SERVER CLAIM')+'</span></div>';return;}
+ el.innerHTML=cybChatState.messages.map(m=>'<div class="cyb-msg '+(m.me?'me':'')+'"><b>'+escapeHtml(window.FarmI18n?.t(m.from)||m.from)+'</b><br>'+escapeHtml(m.from==='CYBCHAT'?(window.FarmI18n?.t(m.text)||m.text):m.text)+'<span class="meta">'+escapeHtml(window.FarmI18n?.t(m.transport||'LOCAL')||m.transport||'LOCAL')+' · '+new Date(m.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'</span></div>').join('');el.scrollTop=el.scrollHeight;
 }
 function cybChatSend(){
  const input=document.getElementById("cybchatInput"),text=(input?.value||'').trim();if(!text)return; if(text.length>4000){robotSpeech('Please keep messages under 4000 characters.');return;}
@@ -243,7 +243,7 @@ function openPanel(which){
  else if(which==="brain") brainPanel();
  else if(which==="network") networkPanel();
  else if(which==="camera") cameraPanel();
- else if(which==="journal") show(`<h2>📖 Farm Journal</h2><p class="muted">Live journal CicadaFarm.</p><div class="grid"><div class="tile"><b id="journalSeason">☀️</b><small>season</small></div><div class="tile"><b>12</b><small>hives</small></div><div class="tile"><b>LIVE</b><small>farm</small></div></div><p>Seasonность, harvest, animals и observations will be saved here.</p>`);
+ else if(which==="journal") show(`<h2>📖 Farm Journal</h2><p class="muted">Live journal CicadaFarm.</p><div class="grid"><div class="tile"><b id="journalSeason">☀️</b><small>season</small></div><div class="tile"><b>4</b><small>hives</small></div><div class="tile"><b>LIVE</b><small>farm</small></div></div><p>Seasons, harvest, animals and observations will be saved here.</p>`);
 }
 let panelTrigger=null;
 function show(html){
@@ -264,7 +264,7 @@ function knowledgePanel(){show(`<h2>📜 KNOWLEDGE ARCHIVE</h2><p class="muted">
 <p class="muted">Your notes stay in this browser. Save family recipes, techniques and observations for later.</p>`);
  document.getElementById('knowledgeText').value=(farmStore.getItem('cicadaKnowledge')||'').slice(0,8000);
 }
-function saveKnowledge(){const t=document.getElementById("knowledgeText").value.trim();if(!t)return;const saved=farmStore.setItem("cicadaKnowledge",t.slice(0,8000));document.getElementById("knowledgeList").innerHTML="<div class='tile'><b>"+(saved?"Saved on this device":"Saved for this session")+"</b><small>"+escapeHtml(t.slice(0,180))+"</small></div>";}
+function saveKnowledge(){const t=document.getElementById("knowledgeText").value.trim();if(!t)return;const saved=farmStore.setItem("cicadaKnowledge",t.slice(0,8000));document.getElementById("knowledgeList").innerHTML="<div class='tile'><b>"+escapeHtml(window.FarmI18n?.t(saved?"Saved on this device":"Saved for this session")||(saved?"Saved on this device":"Saved for this session"))+"</b><small>"+escapeHtml(t.slice(0,180))+"</small></div>";}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function brainPanel(){
  show(`<h2>🧠 ROBOTCYB BRAIN</h2><p class="muted">Observe → interpret → recommend → ask a human when needed.</p><div class="cyberbar"><span><span class="pulse"></span> COGNITIVE CORE ONLINE</span><span class="kicker">FARM MEMORY ${farmStore.getItem('cicadaKnowledge')?'LOADED':'EMPTY'}</span></div><div class="grid"><div class="tile"><b class="metric">24°C</b><small>air temperature</small></div><div class="tile"><b class="metric">87%</b><small>solar battery</small></div><div class="tile"><b class="metric">HIGH</b><small>animal activity</small></div><div class="tile"><b class="metric">12</b><small>hives monitored</small></div></div><table class="cybertable"><tr><td>🐔 Chicken House</td><td class="statusOK">NORMAL</td></tr><tr><td>🦆 Duck House</td><td class="statusWarn">WATER CHECK</td></tr><tr><td>🐐 Goat House</td><td class="statusOK">WARM</td></tr><tr><td>🐝 Bee Land</td><td class="statusOK">ACTIVE</td></tr><tr><td>☀️ Solar Core</td><td class="statusOK">ENERGY POSITIVE</td></tr></table><div class="actions"><button class="primary" onclick="robotInsight()">RUN FARM SCAN</button><button onclick="openPanel('network')">OPEN NETWORK</button></div><div id="brainInsight" class="muted"></div>`);
@@ -321,7 +321,7 @@ async function fetchToken(){
 }
 
 function toggleRobot(){const r=document.getElementById("robotPanel");r.style.display=r.style.display==="block"?"none":"block";}
-async function askRobot(){const input=document.getElementById('robotInput'),q=input.value.trim();if(!q)return;input.value='';const box=document.getElementById('robotMsg');box.textContent='Robotcyb is thinking…';box.textContent=await RobotMind.reply(q);}
+async function askRobot(){const input=document.getElementById('robotInput'),q=input.value.trim();if(!q)return;input.value='';const box=document.getElementById('robotMsg');box.dataset.i18nSkip='';box.textContent=window.FarmI18n?.t('Robotcyb is thinking…')||'Robotcyb is thinking…';box.textContent=await RobotMind.reply(q);}
 
 /* Living farm simulation: grass regrows, animals move inside their own rooms, fish swim in the lake. */
 function seedGrass(){
@@ -436,7 +436,7 @@ document.addEventListener('keydown',event=>{
 document.querySelectorAll(".sector").forEach(el=>{
   el.addEventListener("mouseenter",()=>{
     if(!soundEnabled)return;
-    const label=(el.querySelector("h3")?.textContent||"").toLowerCase();
+    const label=el.className.toLowerCase();
     if(label.includes("chicken")) animalSound("chicken");
     else if(label.includes("turkey")) animalSound("turkey");
     else if(label.includes("goat")) animalSound("goat");
@@ -448,3 +448,5 @@ document.querySelectorAll(".sector").forEach(el=>{
 
 initEntryPixelTwin();
 
+
+window.addEventListener("farm-language-change",()=>{if(document.getElementById("cybchatMessages"))cybChatRender();});
