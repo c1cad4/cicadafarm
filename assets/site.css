@@ -234,3 +234,5 @@ select{font:inherit;background:#06100d;color:var(--ink);border:1px solid var(--l
 .market-price{color:#81ffd0;font-size:17px;font-weight:700;overflow-wrap:anywhere}.market-row{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #164d38}.market-row small{display:block}.market-pay{display:inline-block;background:#12533c;padding:10px;border:1px solid #7affc4;border-radius:9px}button:disabled{opacity:.45;cursor:not-allowed}#marketPayment code{display:block;overflow-wrap:anywhere}#marketPayment input{display:block;width:100%;box-sizing:border-box;margin:8px 0}
 
 #paymentQR{background:white;padding:12px;width:200px;margin:12px 0;border-radius:10px}#paymentQR:empty{display:none}
+
+.cyberbar a,#marketPayment a,#content>a{color:#86ffd0;text-decoration:none;font-size:12px}.cyberbar a{flex-shrink:0;max-width:90px;padding:7px;border:1px solid #235e48;border-radius:8px}.cyberbar a:hover,#marketPayment a:hover{color:#dcfff2;text-shadow:0 0 12px #65ffc5}.market-row button{background:#0a291d;color:#afffdc;border:1px solid #235e48;border-radius:6px;padding:6px 10px}.productCard .primary{min-height:36px;cursor:pointer}
