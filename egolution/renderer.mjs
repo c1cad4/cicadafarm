@@ -1,4 +1,4 @@
-import { SIZE } from "./model.mjs";
+import { SIZE, weather } from "./model.mjs";
 const COLORS = [
   "#97c7ff",
   "#b9a4ff",
@@ -79,6 +79,11 @@ export class Renderer {
       c.fill();
     }
     c.globalAlpha = 1;
+    const event = weather(time);
+    if (event.kind !== "calm") {
+      c.fillStyle = event.kind === "aurora" ? "#63ffbf0a" : "#ff619508";
+      c.fillRect(0, 0, w, h);
+    }
     const zoom = Math.min(1, Math.max(0.65, Math.min(w, h) / 700)),
       cx = w / 2,
       cy = h / 2 + 30,
@@ -124,11 +129,75 @@ export class Renderer {
       c.stroke();
       c.restore();
     }
+    // Three bounded chapter beacons; no extra canvas or growing particle arrays.
+    for (const b of journey.beacons) {
+      const done = b.index < journey.save.objective,
+        next = b.index === journey.save.objective;
+      const pos = next ? journey.target() : b,
+        p = screen(pos || b);
+      if (p.x < -65 || p.x > w + 65 || p.y < -65 || p.y > h + 65) continue;
+      c.save();
+      c.translate(p.x, p.y);
+      c.strokeStyle = done ? "#82ffbd44" : next ? "#ffdf91" : "#ffdf9144";
+      c.fillStyle = done ? "#82ffbd12" : "#ffdf910c";
+      c.lineWidth = next ? 2 : 1;
+      c.beginPath();
+      c.arc(0, 0, journey.save.stage === 3 ? 48 : 28, 0, Math.PI * 2);
+      c.fill();
+      c.stroke();
+      c.fillStyle = next ? "#ffe7b6" : "#a4b1af";
+      c.font = "600 14px system-ui";
+      c.textAlign = "center";
+      c.fillText(done ? "✓" : String(b.index + 1), 0, 5);
+      if (next && journey.warmth > 0) {
+        c.lineWidth = 4;
+        c.strokeStyle = "#8effbe";
+        c.beginPath();
+        c.arc(
+          0,
+          0,
+          52,
+          -Math.PI / 2,
+          -Math.PI / 2 + (Math.PI * 2 * journey.warmth) / 3,
+        );
+        c.stroke();
+      }
+      c.restore();
+    }
+    const target = journey.target();
+    if (target) {
+      const p = screen(target);
+      if (p.x < 35 || p.x > w - 35 || p.y < 80 || p.y > h - 35) {
+        const angle = Math.atan2(p.y - cy, p.x - cx),
+          distance = Math.min(w * 0.35, h * 0.32);
+        c.save();
+        c.translate(
+          cx + Math.cos(angle) * distance,
+          cy + Math.sin(angle) * distance,
+        );
+        c.rotate(angle);
+        c.fillStyle = "#ffdf91";
+        c.beginPath();
+        c.moveTo(10, 0);
+        c.lineTo(-6, -6);
+        c.lineTo(-6, 6);
+        c.closePath();
+        c.fill();
+        c.restore();
+      }
+    }
     c.save();
     c.translate(cx, cy);
     c.scale(zoom, zoom);
     if (journey.invincible > 0)
       c.globalAlpha = 0.6 + 0.4 * Math.sin(time * 12) ** 2;
+    if (journey.boostLeft > 0) {
+      c.strokeStyle = "#b6fff0aa";
+      c.lineWidth = 2;
+      c.beginPath();
+      c.arc(0, 0, 42, 0, Math.PI * 2);
+      c.stroke();
+    }
     this.form(s, color, time, shell);
     c.restore();
     if (bigBang > 0) {
@@ -146,6 +215,43 @@ export class Renderer {
       }
       c.globalAlpha = 1;
     }
+    const map = 100,
+      mx = 16,
+      my = h - map - 24;
+    c.fillStyle = "#081621d9";
+    c.strokeStyle = "#345362";
+    c.lineWidth = 1;
+    c.fillRect(mx, my, map, map);
+    c.strokeRect(mx, my, map, map);
+    for (const b of journey.beacons) {
+      const position =
+        b.index === journey.save.objective ? journey.target() || b : b;
+      c.fillStyle =
+        b.index < journey.save.objective
+          ? "#5acb9166"
+          : b.index === journey.save.objective
+            ? "#ffdf91"
+            : "#918567";
+      c.beginPath();
+      c.arc(
+        mx + (position.x / SIZE) * map,
+        my + (position.y / SIZE) * map,
+        3,
+        0,
+        7,
+      );
+      c.fill();
+    }
+    c.fillStyle = "#bafce7";
+    c.beginPath();
+    c.arc(
+      mx + (journey.x / SIZE) * map,
+      my + (journey.y / SIZE) * map,
+      3,
+      0,
+      7,
+    );
+    c.fill();
     if (preview) {
       c.save();
       c.translate(w / 2, h / 2);

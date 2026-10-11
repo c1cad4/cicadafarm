@@ -1,4 +1,4 @@
-import { Journey, COSTS } from "./model.mjs";
+import { Journey, COSTS, GOALS, weather } from "./model.mjs";
 import { Renderer } from "./renderer.mjs";
 import { t, translate } from "./i18n.mjs";
 import { setupShop } from "./shop.mjs";
@@ -19,7 +19,7 @@ let started = false,
   preview = null,
   sound = false,
   audio = null,
-  completed = journey.save.stage === 6 && journey.save.energy === COSTS[6];
+  completed = journey.save.stage === 6 && journey.finished();
 const keys = new Set();
 let pointer = null,
   vector = { x: 0, y: 0 };
@@ -38,7 +38,21 @@ function hud() {
   const s = journey.save.stage;
   $("#stageCount").textContent = `0${s + 1} / 07`;
   $("#stageName").textContent = t("stages")[s];
-  $("#mission").textContent = t("missions")[s];
+  $("#mission").textContent = t("tasks")[s];
+  $("#objectiveStatus").textContent =
+    `${t("objectives")}: ${journey.save.objective} / ${GOALS[s]}${s === 3 && journey.warmth > 0 ? " · " + journey.warmth.toFixed(1) + " / 3 s" : ""}`;
+  const event = weather(journey.time);
+  $("#eventStatus").textContent = `${t(event.kind)} · ${event.remaining}s`;
+  $("#boost").disabled =
+    journey.cooldown > 0 ||
+    paused ||
+    !started ||
+    !!document.querySelector("dialog[open]") ||
+    !!preview;
+  $("#boost").textContent =
+    journey.cooldown > 0
+      ? `${t("boost")} · ${Math.ceil(journey.cooldown)}s`
+      : `${t("boost")} · E`;
   $("#energy").textContent =
     `${journey.save.energy} / ${COSTS[s]} ${t("light")}`;
   $("#total").textContent = `${journey.save.total} ${t("gathered")}`;
@@ -46,7 +60,7 @@ function hud() {
   $("#forms").textContent = `${t("forms")}: ${t("stages")
     .slice(0, journey.save.cycles ? 7 : s + 1)
     .join(" → ")}`;
-  $("#rebirth").disabled = !(s === 6 && journey.save.energy === COSTS[s]);
+  $("#rebirth").disabled = !(s === 6 && journey.finished());
   $("#nextStage").textContent = t("stages")[Math.min(6, s + 1)];
   $("#start").textContent = t(saved ? "resume" : "begin");
 }
@@ -147,7 +161,26 @@ const shop = setupShop({
     stop();
   },
 });
+$("#boost").onclick = () => {
+  if (
+    !paused &&
+    started &&
+    !preview &&
+    !document.querySelector("dialog[open]") &&
+    journey.boost()
+  )
+    tone(300);
+};
 window.addEventListener("keydown", (e) => {
+  if (
+    e.key.toLowerCase() === "e" &&
+    !e.repeat &&
+    !document.querySelector("dialog[open]")
+  ) {
+    e.preventDefault();
+    $("#boost").click();
+    return;
+  }
   if (document.querySelector("dialog[open]")) return;
   if (
     [
@@ -250,6 +283,11 @@ function frame(now) {
         (keys.has("w") || keys.has("arrowup") ? 1 : 0);
     }
     const result = journey.step(dt, dx, dy);
+    if (result.objective) {
+      toast(t("objectiveDone"));
+      tone(740);
+      persist();
+    }
     if (result.collected) tone(420 + journey.save.stage * 45);
     if (result.hit) {
       tone(95);
@@ -261,11 +299,7 @@ function frame(now) {
       persist();
       $("#evolution").showModal();
     }
-    if (
-      !completed &&
-      journey.save.stage === 6 &&
-      journey.save.energy === COSTS[6]
-    ) {
+    if (!completed && journey.save.stage === 6 && journey.finished()) {
       completed = true;
       persist();
       hud();

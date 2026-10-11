@@ -449,3 +449,46 @@ code {
     white-space: nowrap;
   }
 }
+
+#objectiveStatus {
+  color: #ffdf91 !important;
+  font-size: 12px !important;
+}
+#eventStatus {
+  font-size: 10px;
+  color: #9dd0c0;
+  margin-top: 6px;
+}
+#boost {
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(28px, env(safe-area-inset-bottom));
+  min-height: 52px;
+  min-width: 100px;
+  border-color: #63b7a0;
+  background: #102c28e8;
+}
+#boost:disabled {
+  opacity: 0.6;
+}
+@media (max-width: 600px) {
+  #hud {
+    width: 235px;
+  }
+  #mission {
+    font-size: 11px;
+  }
+  #boost {
+    right: 16px;
+    bottom: max(28px, env(safe-area-inset-bottom));
+    font-size: 13px;
+  }
+}
+@media (max-height: 480px) {
+  #objectiveStatus {
+    margin-top: 4px !important;
+  }
+  #eventStatus {
+    display: none;
+  }
+}

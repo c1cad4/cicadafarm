@@ -1,4 +1,22 @@
 const en = {
+  tasks: [
+    "Ignite three numbered stars, then fill your light.",
+    "Bond atoms 1 → 2 → 3. Each bond uses 4 light.",
+    "Feed three organelles. Each needs 6 light.",
+    "Stay still inside the golden nest for 3 seconds.",
+    "Chase three moving life sparks.",
+    "Connect the thought nodes 1 → 2 → 3.",
+    "Wake three sleeping cores. Each uses 5 light.",
+  ],
+  objectives: "Milestones",
+  objectiveDone: "Milestone reached!",
+  boost: "Boost",
+  calm: "Calm · collect light",
+  aurora: "Aurora · double light",
+  storm: "Solar storm · stronger anomalies",
+  newHelp:
+    "Follow the numbered beacons and the radar. Atoms need 4 light per bond, cells need 6 per organelle, and sleeping ROBOTCYB cores need 5. Incubate the egg by staying still in its nest for 3 seconds. Creature sparks move. Use the free boost button or E; it recharges in 6 seconds. Every minute brings calm, double-light aurora and stronger solar anomalies.",
+
   tagline: "from Big Bang to ROBOTCYB",
   headline: "A universe begins with you.",
   intro:
@@ -63,7 +81,7 @@ const en = {
   ],
   light: "light",
   gathered: "gathered",
-  paused: "Paused · tap Ⅱ to continue",
+  paused: "Paused · tap ▶ to continue",
   hit: "Anomaly! Some light escaped.",
   complete: "ROBOTCYB is awake. Your universe is complete.",
   saved: "Progress stays on this device",
@@ -80,6 +98,24 @@ const en = {
   offline: "Payment verification unavailable. Retry later; do not pay again.",
 };
 const ru = {
+  tasks: [
+    "Зажги три звезды по номерам и наполни свет.",
+    "Соедини атомы 1 → 2 → 3. Каждая связь тратит 4 света.",
+    "Накорми три органеллы: каждой нужно 6 света.",
+    "Стой в золотом гнезде 3 секунды, чтобы согреть яйцо.",
+    "Поймай три движущиеся искры жизни.",
+    "Соедини узлы мысли 1 → 2 → 3.",
+    "Пробуди три спящих ядра: каждое тратит 5 света.",
+  ],
+  objectives: "Цели",
+  objectiveDone: "Цель достигнута!",
+  boost: "Рывок",
+  calm: "Покой · собирай свет",
+  aurora: "Сияние · двойной свет",
+  storm: "Солнечная буря · сильнее аномалии",
+  newHelp:
+    "Иди к маякам по номерам и следи за радаром. Связь атомов требует 4 света, органелла клетки — 6, ядро ROBOTCYB — 5. Для яйца стой в гнезде 3 секунды. Искры существа движутся. Бесплатный рывок — кнопка или E, восстановление за 6 секунд. Каждую минуту чередуются покой, сияние с двойным светом и буря с усиленными аномалиями.",
+
   tagline: "от Большого взрыва до ROBOTCYB",
   headline: "Вселенная начинается с тебя.",
   intro:
@@ -144,7 +180,7 @@ const ru = {
   ],
   light: "свет",
   gathered: "собрано",
-  paused: "Пауза · нажми Ⅱ для продолжения",
+  paused: "Пауза · нажми ▶ для продолжения",
   hit: "Аномалия! Часть света потеряна.",
   complete: "ROBOTCYB пробудился. Вселенная создана.",
   saved: "Прогресс хранится на этом устройстве",
@@ -161,6 +197,24 @@ const ru = {
   offline: "Проверка оплаты недоступна. Повтори позже, не оплачивай снова.",
 };
 const zh = {
+  tasks: [
+    "按编号点亮三颗星，再充满光。",
+    "连接原子 1 → 2 → 3，每次消耗 4 光。",
+    "滋养三个细胞器，每个需要 6 光。",
+    "在金色巢内静止 3 秒，孵化卵。",
+    "追逐三个移动的生命火花。",
+    "连接意识节点 1 → 2 → 3。",
+    "唤醒三个沉睡核心，每个消耗 5 光。",
+  ],
+  objectives: "目标",
+  objectiveDone: "达成目标！",
+  boost: "冲刺",
+  calm: "平静 · 收集光",
+  aurora: "极光 · 双倍光",
+  storm: "太阳风暴 · 更强异常",
+  newHelp:
+    "跟随编号信标与雷达。原子连接需要 4 光，细胞器需要 6 光，ROBOTCYB 核心需要 5 光。在巢内静止 3 秒孵化卵，生物火花会移动。点击按钮或 E 免费冲刺，6 秒后恢复。每分钟循环平静、双倍光极光和增强异常的太阳风暴。",
+
   tagline: "从大爆炸到 ROBOTCYB",
   headline: "宇宙从你开始。",
   intro: "从火花到生命意识。收集光，避开红色异常，选择你的进化方向。",
@@ -213,7 +267,7 @@ const zh = {
   ],
   light: "光",
   gathered: "已收集",
-  paused: "已暂停 · 点击 Ⅱ 继续",
+  paused: "已暂停 · 点击 ▶ 继续",
   hit: "异常！失去了一些光。",
   complete: "ROBOTCYB 苏醒了。宇宙已完成。",
   saved: "进度保存在此设备",
@@ -242,6 +296,7 @@ export function translate(value = language) {
     .querySelectorAll("[data-i18n]")
     .forEach((e) => (e.textContent = t(e.dataset.i18n)));
   document.querySelector("#language").value = language;
+  document.querySelector("#boost").ariaLabel = t("boost");
   document.querySelector("#sound").ariaLabel = t("sound");
   document.querySelector("#pause").ariaLabel = t("pause");
   document.querySelector("#helpOpen").ariaLabel = t("help");
