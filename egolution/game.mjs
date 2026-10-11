@@ -142,7 +142,10 @@ $("#language").onchange = (e) => {
 const shop = setupShop({
   toast,
   setShell: (v) => (shell = v),
-  setPreview: (v) => (preview = v),
+  setPreview: (v) => {
+    preview = v;
+    stop();
+  },
 });
 window.addEventListener("keydown", (e) => {
   if (document.querySelector("dialog[open]")) return;
@@ -231,7 +234,7 @@ function frame(now) {
     last = 0;
     return;
   }
-  const modal = !!document.querySelector("dialog[open]");
+  const modal = !!document.querySelector("dialog[open]") || !!preview;
   if (now - last < (modal || paused || !started ? 100 : 16)) return;
   const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
   last = now;

@@ -25,6 +25,7 @@ export function setupShop({ toast, setShell, setPreview }) {
   try {
     pending = JSON.parse(safeGet(localStorage, "egolution-pending"));
   } catch {}
+  let previewTimer;
   const status = (message) => ($("#shopStatus").textContent = message);
   async function api(path, body) {
     const r = await fetch(`${API}/${path}`, {
@@ -63,10 +64,11 @@ export function setupShop({ toast, setShell, setPreview }) {
       const preview = document.createElement("button");
       preview.textContent = t("preview");
       preview.onclick = () => {
+        clearTimeout(previewTimer);
         setPreview(id);
         $("#shop").close();
         toast(t(id));
-        setTimeout(() => setPreview(null), 4500);
+        previewTimer = setTimeout(() => setPreview(null), 4500);
       };
       const buy = document.createElement("button");
       buy.textContent = t(inventory.owned.includes(id) ? "equip" : "buy");

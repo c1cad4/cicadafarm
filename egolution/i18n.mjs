@@ -6,7 +6,7 @@ const en = {
   begin: "Begin the Big Bang",
   resume: "Continue your journey",
   controls:
-    "Move with your finger, mouse, WASD or arrow keys. All seven stages are free.",
+    "Drag a finger or hold the mouse on the field. WASD / arrow keys also work. All seven stages are free.",
   farm: "Visit CicadaFarm",
   shells: "Shells",
   evolution: "EVOLUTION READY",
@@ -87,7 +87,7 @@ const ru = {
   begin: "Начать Большой взрыв",
   resume: "Продолжить путешествие",
   controls:
-    "Двигайся пальцем, мышью, WASD или стрелками. Все семь стадий бесплатны.",
+    "Веди пальцем или удерживай мышь на поле. Также работают WASD и стрелки. Все семь стадий бесплатны.",
   farm: "В CicadaFarm",
   shells: "Оболочки",
   evolution: "ПОРА ЭВОЛЮЦИОНИРОВАТЬ",
@@ -166,7 +166,8 @@ const zh = {
   intro: "从火花到生命意识。收集光，避开红色异常，选择你的进化方向。",
   begin: "开始大爆炸",
   resume: "继续旅程",
-  controls: "用手指、鼠标、WASD 或方向键移动。七个阶段全部免费。",
+  controls:
+    "用手指拖动或在场地上按住鼠标。也可使用 WASD 或方向键。七个阶段全部免费。",
   farm: "前往 CicadaFarm",
   shells: "外壳",
   evolution: "准备进化",
