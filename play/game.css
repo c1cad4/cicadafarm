@@ -855,3 +855,9 @@ input:focus-visible {
     padding: 10px 25px;
   }
 }
+/* The room selector must not override the expanded arena height. */
+.arena:has(#roomPanel):fullscreen,
+.arena.expanded:has(#roomPanel) {
+  height: 100dvh;
+  min-height: 0;
+}
