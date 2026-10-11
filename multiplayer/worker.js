@@ -1,6 +1,7 @@
 import { World, name } from "./model.js";
 import { cleanChat } from "./commerce.js";
 export { Accounts } from "./accounts.js";
+export { Accounts as EgolutionAccounts } from "./egolution/accounts.js";
 const allowed = new Set([
   "https://cicadafarm.pages.dev",
   "https://cicadafarm-game.pages.dev",
@@ -10,6 +11,41 @@ const allowed = new Set([
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/egolution/health")
+      return Response.json(
+        {
+          service: "Egolution",
+          checkoutConfigured: !!env.SOLANA_RPC_URL,
+          currencies: ["ROBOTCYB"],
+          recipient: "ARxc7VD9vXBWLtrRxEGyM3cwRPmqxcWu6s9gjgUvzwwP",
+        },
+        { headers: { "Access-Control-Allow-Origin": "*" } },
+      );
+    if (url.pathname.startsWith("/egolution/api/")) {
+      const origin = request.headers.get("Origin");
+      if (!allowed.has(origin))
+        return new Response("Origin denied", { status: 403 });
+      if (request.method === "OPTIONS")
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+            Vary: "Origin",
+          },
+        });
+      if (!["POST", "GET"].includes(request.method))
+        return new Response("Method denied", { status: 405 });
+      url.pathname = url.pathname.replace("/egolution", "");
+      const response = await env.EGOLUTION_ACCOUNTS.get(
+        env.EGOLUTION_ACCOUNTS.idFromName("egolution-accounts"),
+      ).fetch(new Request(url, request));
+      const out = new Response(response.body, response);
+      out.headers.set("Access-Control-Allow-Origin", origin);
+      out.headers.set("Cache-Control", "no-store");
+      out.headers.set("Vary", "Origin");
+      return out;
+    }
     if (url.pathname === "/health")
       return Response.json(
         {

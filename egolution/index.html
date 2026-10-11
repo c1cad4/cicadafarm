@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#060b13" />
+    <meta
+      name="description"
+      content="Egolution: evolve from the Big Bang to ROBOTCYB. A free cosmic browser game with optional ROBOTCYB shells."
+    />
+    <title>Egolution · ROBOTCYB</title>
+    <link rel="icon" href="assets/robotcyb.jpg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <canvas id="world" aria-label="Evolution playing field"></canvas>
+    <header>
+      <a
+        class="brand"
+        href="https://robotcyb.ai/"
+        target="_blank"
+        rel="noopener"
+        ><img src="assets/robotcyb.jpg" alt="ROBOTCYB" /><span
+          >EGOLUTION<small data-i18n="tagline"
+            >from Big Bang to ROBOTCYB</small
+          ></span
+        ></a
+      >
+      <nav>
+        <select id="language" aria-label="Language">
+          <option value="en">EN</option>
+          <option value="ru">RU</option>
+          <option value="zh">中文</option></select
+        ><button id="sound" aria-label="Sound">♫</button
+        ><button id="pause" aria-label="Pause">Ⅱ</button
+        ><button id="shopOpen" data-i18n="shells">Shells</button
+        ><button id="helpOpen" aria-label="Help">?</button>
+      </nav>
+    </header>
+    <section id="hud" aria-live="polite">
+      <div>
+        <span id="stageCount"></span><strong id="stageName"></strong
+        ><small id="mission"></small>
+      </div>
+      <div class="progress"><div id="fill"></div></div>
+      <p><span id="energy"></span><span id="total"></span></p>
+    </section>
+    <div id="joystick" hidden><span></span></div>
+    <div id="toast" role="status"></div>
+    <dialog id="intro">
+      <p class="eyebrow">ROBOTCYB / EGOLUTION</p>
+      <h1 data-i18n="headline">A universe begins with you.</h1>
+      <p data-i18n="intro">
+        From a spark to a living mind. Collect light, avoid red anomalies and
+        choose how you evolve.
+      </p>
+      <div class="stages" aria-hidden="true">✧ ⬡ ◉ ◍ 🥚 🪽 ◎</div>
+      <button id="start" class="primary" data-i18n="begin">
+        Begin the Big Bang
+      </button>
+      <p class="hint" data-i18n="controls">
+        Move with your finger, mouse, WASD or arrow keys. All seven stages are
+        free.
+      </p>
+      <a href="https://cicadafarm.pages.dev/play/" data-i18n="farm"
+        >Visit CicadaFarm</a
+      >
+    </dialog>
+    <dialog id="evolution">
+      <p class="eyebrow" data-i18n="evolution">EVOLUTION READY</p>
+      <h2 id="nextStage"></h2>
+      <p data-i18n="choose">Choose a free adaptation for the next form.</p>
+      <div class="choices">
+        <button data-trait="speed">
+          ↗ <b data-i18n="speed">Swift</b
+          ><small data-i18n="speedDesc">Move a little faster</small></button
+        ><button data-trait="shield">
+          ◇ <b data-i18n="shield">Resilient</b
+          ><small data-i18n="shieldDesc"
+            >Lose less light on impact</small
+          ></button
+        ><button data-trait="magnet">
+          ◎ <b data-i18n="magnet">Curious</b
+          ><small data-i18n="magnetDesc">Collect light from farther away</small>
+        </button>
+      </div>
+    </dialog>
+    <dialog id="help">
+      <button class="close" data-close aria-label="Close">×</button>
+      <h2 data-i18n="help">Your evolution</h2>
+      <p data-i18n="helpText">
+        Collect glowing particles. Red anomalies take some light, never your
+        unlocked forms. Each new stage changes your appearance. Adaptations
+        stack. Reach ROBOTCYB, fill its core and start a new universe.
+      </p>
+      <p data-i18n="controls">
+        Move with your finger, mouse, WASD or arrow keys. All seven stages are
+        free.
+      </p>
+      <p data-i18n="fiction">
+        A playful cosmic story, not a scientific model of evolution. ROBOTCYB
+        starts as a meme and dreams of becoming a useful reality.
+      </p>
+      <p id="forms"></p>
+      <button id="rebirth" data-i18n="rebirth">Start a new universe</button>
+      <p class="hint" data-i18n="saveNote">
+        Journey saved on this device. Paid shells are linked to your signed
+        wallet.
+      </p>
+    </dialog>
+    <dialog id="shop">
+      <button class="close" data-close aria-label="Close">×</button>
+      <p class="eyebrow">ROBOTCYB / ATELIER</p>
+      <h2 data-i18n="shells">Shells</h2>
+      <p data-i18n="shopText">
+        Optional appearances for your final form. Preview freely. Every
+        evolution and adaptation stays free.
+      </p>
+      <div class="wallets">
+        <button id="phantom">Phantom</button
+        ><button id="solflare">Solflare</button
+        ><button id="disconnect" hidden data-i18n="disconnect">
+          Disconnect
+        </button>
+      </div>
+      <p id="walletLabel" class="hint" data-i18n="walletHint">
+        Connect and sign a message to restore your shells. A sign-in does not
+        transfer funds.
+      </p>
+      <div id="items"></div>
+      <button id="classic" data-i18n="classic">Use original form</button>
+      <section id="invoice" hidden>
+        <h3 data-i18n="review">Review payment</h3>
+        <p id="invoiceText"></p>
+        <small data-i18n="recipient">Recipient</small
+        ><code id="merchant"></code>
+        <p class="hint" data-i18n="fees">
+          Wallet approval required. Network and token account fees are
+          additional, paid in SOL. This purchase has no gameplay advantage.
+        </p>
+        <button id="pay" class="primary" data-i18n="pay">
+          Confirm in wallet</button
+        ><button id="cancelQuote" data-i18n="cancel">Cancel</button>
+      </section>
+      <button id="retry" hidden data-i18n="retry">
+        Verify pending payment — do not pay again
+      </button>
+      <p id="shopStatus" role="status"></p>
+      <p class="hint" data-i18n="purchaseNote">
+        Only a finalized matching payment unlocks a shell. Keep your transaction
+        receipt. No tokens are earned by playing.
+      </p>
+    </dialog>
+    <script type="module" src="game.mjs"></script>
+  </body>
+</html>

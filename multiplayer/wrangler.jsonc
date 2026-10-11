@@ -7,23 +7,37 @@
     "bindings": [
       {
         "name": "GARDENS",
-        "class_name": "Garden",
+        "class_name": "Garden"
       },
       {
         "name": "ACCOUNTS",
-        "class_name": "Accounts",
+        "class_name": "Accounts"
       },
-    ],
+      {
+        "name": "EGOLUTION_ACCOUNTS",
+        "class_name": "EgolutionAccounts"
+      }
+    ]
   },
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": ["Garden"],
+      "new_sqlite_classes": [
+        "Garden"
+      ]
     },
     {
       "tag": "v2",
-      "new_sqlite_classes": ["Accounts"],
+      "new_sqlite_classes": [
+        "Accounts"
+      ]
     },
+    {
+      "tag": "v3",
+      "new_sqlite_classes": [
+        "EgolutionAccounts"
+      ]
+    }
   ],
-  "account_id": "30bb491ee95d0edf0c3a37c3b1aafe47",
+  "account_id": "30bb491ee95d0edf0c3a37c3b1aafe47"
 }
