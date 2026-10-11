@@ -1,3 +1,4 @@
+import { camera, screenPoint, touchTarget, pixelRatio } from "./viewport.mjs";
 import { audioUI, sound } from "./audio.js";
 import { World, safe } from "../multiplayer/model.js";
 import { profileUI } from "./profile.js";
@@ -270,6 +271,13 @@ const extra = {
   },
 };
 for (const l of Object.keys(extra)) Object.assign(text[l], extra[l]);
+for (const [language, help] of Object.entries({
+  en: "On touch screens: drag anywhere to steer; release to stop. The small map points to safe hives.",
+  ru: "На телефоне: тяни пальцем в любом месте, чтобы двигаться; отпусти для остановки. Мини-карта показывает безопасные ульи.",
+  "zh-CN":
+    "触屏操作：在任意位置拖动来控制方向，松开即可停止。小地图显示安全蜂箱。",
+}))
+  text[language].instructions += " " + help;
 const $ = (id) => document.getElementById(id),
   canvas = $("world"),
   ctx = canvas.getContext("2d"),
@@ -453,24 +461,60 @@ for (const id of ["nickname", "country", "color"])
       Object.assign(player, v);
     }
   });
+let touchOrigin = null,
+  touchPoint = null,
+  activePointer = null;
 function pointer(e) {
   const r = canvas.getBoundingClientRect();
-  target = {
-    x: ((e.clientX - r.left) * 1000) / r.width,
-    y: ((e.clientY - r.top) * 540) / r.height,
-  };
+  const point = { x: e.clientX - r.left, y: e.clientY - r.top };
+  const mine = player;
+  const mapW = 1000,
+    mapH = 540;
+  const view = camera(width, height, mapW, mapH, mine);
+  if (e.pointerType && e.pointerType !== "mouse") touchPoint = point;
+  const q =
+    touchOrigin && e.pointerType && e.pointerType !== "mouse"
+      ? touchTarget(mine, touchOrigin, point)
+      : screenPoint(view, point.x, point.y);
+  target = q;
 }
 canvas.addEventListener("pointerdown", (e) => {
+  if (activePointer !== null) return;
+  activePointer = e.pointerId;
   canvas.setPointerCapture(e.pointerId);
+  if (e.pointerType && e.pointerType !== "mouse") {
+    const r = canvas.getBoundingClientRect();
+    touchOrigin = { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
   pointer(e);
 });
 canvas.addEventListener("pointermove", (e) => {
-  if (e.pointerType === "mouse" || e.buttons) pointer(e);
+  if (e.pointerType === "mouse" || e.pointerId === activePointer) pointer(e);
 });
-canvas.addEventListener("pointerup", (e) => {
-  if (e.pointerType !== "mouse") target = null;
+
+function refreshTouch() {
+  if (!touchOrigin || !touchPoint) return;
+  target = touchTarget(player, touchOrigin, touchPoint);
+}
+function releasePointer(e) {
+  if (e.pointerId !== activePointer) return;
+  activePointer = null;
+  touchOrigin = touchPoint = null;
+  if (e.pointerType && e.pointerType !== "mouse") target = null;
+}
+canvas.addEventListener("pointerup", releasePointer);
+canvas.addEventListener("pointercancel", releasePointer);
+canvas.addEventListener("lostpointercapture", releasePointer);
+window.addEventListener("blur", () => {
+  touchOrigin = touchPoint = null;
+  activePointer = null;
 });
-canvas.addEventListener("pointercancel", () => (target = null));
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    touchOrigin = touchPoint = null;
+    activePointer = null;
+  }
+});
 window.addEventListener("keydown", (e) => {
   if (e.target.closest("select,button,a,input,textarea")) return;
   if (
@@ -500,7 +544,7 @@ function resize() {
   const r = canvas.getBoundingClientRect();
   width = r.width;
   height = r.height;
-  dpr = Math.min(devicePixelRatio || 1, 1.5);
+  dpr = pixelRatio(width, height, devicePixelRatio);
   canvas.width = Math.round(width * dpr);
   canvas.height = Math.round(height * dpr);
   target = null;
@@ -601,7 +645,19 @@ $("share").onclick = async () => {
     $("shareStatus").textContent = t("copyManual");
   }
 };
+let drawAt = 0,
+  idleDrawAt = 0;
 function loop(now) {
+  if (document.hidden) {
+    requestAnimationFrame(loop);
+    return;
+  }
+  if (now - drawAt < 1000 / 60 - 1) {
+    requestAnimationFrame(loop);
+    return;
+  }
+  drawAt = now;
+  refreshTouch();
   const dt = last ? Math.min(0.1, (now - last) / 1000) : 0;
   last = now;
   if (state === "running") {
@@ -615,12 +671,17 @@ function loop(now) {
     hud();
     hudAt = now;
   }
-  drawScene(ctx, width, height, dpr, world.snapshot(), "solo", now, {
-    total: progress.total,
-    trail,
-    target: state === "running" ? target : null,
-    safeLabel: t("safe"),
-  });
+  if (state === "running" || now - idleDrawAt > 250) {
+    drawScene(ctx, width, height, dpr, world.snapshot(), "solo", now, {
+      total: progress.total,
+      trail,
+      target: state === "running" ? target : null,
+      safeLabel: t("safe"),
+      touchOrigin,
+      touchPoint,
+    });
+    idleDrawAt = now;
+  }
   requestAnimationFrame(loop);
 }
 setup();

@@ -745,3 +745,113 @@ input:focus-visible {
     max-width: 110px;
   }
 }
+
+/* Touch screens: readable controls, safe areas and compact in-round HUD. */
+.arena {
+  overscroll-behavior: contain;
+}
+.arena:fullscreen,
+.arena.expanded {
+  padding: 0;
+}
+@media (pointer: coarse), (max-width: 700px) {
+  button,
+  select,
+  input {
+    min-height: 44px;
+  }
+  input,
+  select,
+  #socialPanel input,
+  #socialPanel select {
+    font-size: 16px;
+  }
+  .arena {
+    height: min(680px, 80svh);
+    min-height: 430px;
+  }
+  .arena:has(#roomPanel) {
+    height: min(740px, 85svh);
+  }
+  .arena:has(#overlay[hidden]) #roomPanel,
+  .arena:has(#overlay[hidden]) #profilePanel {
+    display: none;
+  }
+  .arena:fullscreen,
+  .arena.expanded {
+    height: 100dvh;
+    min-height: 0;
+  }
+  .hud {
+    padding: max(12px, env(safe-area-inset-top))
+      max(12px, env(safe-area-inset-right)) 12px
+      max(12px, env(safe-area-inset-left));
+  }
+  .bottom {
+    padding: 8px max(10px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    gap: 5px;
+  }
+  .bottom #hint {
+    display: none;
+  }
+  .bottom button {
+    flex: 1;
+    min-height: 44px;
+    font-size: 10px;
+    padding: 6px;
+  }
+  #socialPanel {
+    top: max(65px, calc(env(safe-area-inset-top) + 56px));
+    bottom: max(65px, calc(env(safe-area-inset-bottom) + 56px));
+    backdrop-filter: none;
+  }
+  #socialPanel button {
+    min-height: 44px;
+  }
+  #overlay {
+    padding-top: 155px;
+    backdrop-filter: none;
+  }
+  .panel {
+    padding: 15px;
+    max-height: 100%;
+  }
+  .panel h2 {
+    font-size: 22px;
+  }
+  .panel p {
+    font-size: 12px;
+  }
+  .panel button {
+    margin: 12px auto;
+  }
+  #objectives {
+    bottom: max(65px, calc(env(safe-area-inset-bottom) + 56px));
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  #roomPanel,
+  #profilePanel {
+    top: 52px;
+  }
+  #overlay {
+    padding-top: 105px;
+  }
+  .panel .eyebrow,
+  .panel small {
+    display: none;
+  }
+  .panel h2 {
+    margin: 4px;
+    font-size: 18px;
+  }
+  .panel p {
+    line-height: 1.25;
+    margin: 4px;
+  }
+  .panel button {
+    margin: 8px auto;
+    padding: 10px 25px;
+  }
+}

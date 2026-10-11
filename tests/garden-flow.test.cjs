@@ -5,6 +5,7 @@ const test = require("node:test"),
 test("a completed solo daily round saves delivered harvest, restores its garden and shares an honest result", async () => {
   const { World, safe } = await import("../multiplayer/model.js");
   const garden = await import("../play/garden-core.mjs");
+  const viewport = await import("../play/viewport.mjs");
   const code = fs
     .readFileSync(require.resolve("../play/game.js"), "utf8")
     .replace(/^import[\s\S]*?from ["'][^"']+["'];\s*/gm, "");
@@ -57,6 +58,7 @@ test("a completed solo daily round saves delivered harvest, restores its garden 
         value: () => ({ name: "Garden test", country: "RU", color: "#39bfff" }),
         lock() {},
       }),
+      ...viewport,
       drawScene() {},
       audioUI() {},
       sound() {},
@@ -118,6 +120,7 @@ test("a completed solo daily round saves delivered harvest, restores its garden 
   ui.frames(100);
   assert.ok(Number(ui.el("mass").textContent) >= 25);
   assert.equal(ui.el("cargo").textContent, "1 / 20");
+  ui.el("world").listeners.pointerup({ pointerId: 1, pointerType: "mouse" });
   ui.el("world").listeners.pointerdown({
     pointerId: 1,
     clientX: 500,

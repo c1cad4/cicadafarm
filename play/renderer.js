@@ -1,3 +1,4 @@
+import { camera } from "./viewport.mjs";
 import { drawBackdrop } from "./backdrop.js";
 import { flag } from "../multiplayer/profile.js";
 import { radius, safe } from "../multiplayer/model.js";
@@ -13,7 +14,16 @@ export function drawScene(
 ) {
   const mapW = world.width || 1000,
     mapH = world.height || 540;
-  ctx.setTransform((dpr * width) / mapW, 0, 0, (dpr * height) / mapH, 0, 0);
+  const own = (world.players || []).find((p) => p.id === identity);
+  const view = camera(width, height, mapW, mapH, own);
+  ctx.setTransform(
+    dpr * view.scale,
+    0,
+    0,
+    dpr * view.scale,
+    -view.x * dpr * view.scale,
+    -view.y * dpr * view.scale,
+  );
   const circle = (x, y, r, color) => {
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -21,20 +31,6 @@ export function drawScene(
     ctx.fill();
   };
   drawBackdrop(ctx, mapW, mapH);
-  ctx.strokeStyle = "#24463288";
-  ctx.lineWidth = 0.5;
-  for (let x = 0; x < mapW; x += 42) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, mapH);
-    ctx.stroke();
-  }
-  for (let y = 0; y < mapH; y += 42) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(mapW, y);
-    ctx.stroke();
-  }
   const total = options.total ?? world.total ?? 0;
   const count = Math.min(48, Math.floor(total / 10));
   for (let i = 0; i < count; i++) {
@@ -116,6 +112,13 @@ export function drawScene(
   }
   const colors = ["#dbeb90", "#ffc17b", "#79e4e2", "#ebafff"];
   for (const p of world.resources || []) {
+    if (
+      p.x < view.x - 15 ||
+      p.x > view.x + view.viewW + 15 ||
+      p.y < view.y - 15 ||
+      p.y > view.y + view.viewH + 15
+    )
+      continue;
     circle(p.x, p.y, p.kind === 3 ? 12 : 8, colors[p.kind] + "18");
     circle(p.x, p.y, p.kind === 3 ? 5 : 3.5, colors[p.kind]);
     if (p.kind === 3) {
@@ -125,7 +128,6 @@ export function drawScene(
       ctx.stroke();
     }
   }
-  const own = (world.players || []).find((p) => p.id === identity);
   for (let i = 0; i < (own?.cargo || 0); i++) {
     const p = options.trail?.[Math.min(options.trail.length - 1, (i + 1) * 5)];
     if (p) circle(p.x, p.y, 3, colors[i % 4]);
@@ -235,5 +237,47 @@ export function drawScene(
     ctx.beginPath();
     ctx.arc(options.target.x, options.target.y, 8, 0, 7);
     ctx.stroke();
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (own && (view.viewW < mapW - 1 || view.viewH < mapH - 1)) {
+    const mw = Math.min(112, width * 0.25),
+      mh = (mw * mapH) / mapW;
+    const mx = width - mw - 12,
+      my = 78;
+    ctx.fillStyle = "#03110bdd";
+    ctx.fillRect(mx, my, mw, mh);
+    ctx.strokeStyle = "#90cfa077";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(mx, my, mw, mh);
+    ctx.strokeStyle = "#c0edd266";
+    ctx.strokeRect(
+      mx + (view.x / mapW) * mw,
+      my + (view.y / mapH) * mh,
+      (view.viewW / mapW) * mw,
+      (view.viewH / mapH) * mh,
+    );
+    for (const home of world.homes || [{ x: 500, y: 270 }])
+      circle(
+        mx + (home.x / mapW) * mw,
+        my + (home.y / mapH) * mh,
+        3,
+        "#c4ff8b",
+      );
+    circle(mx + (own.x / mapW) * mw, my + (own.y / mapH) * mh, 3, "#79e4e2");
+  }
+  if (options.touchOrigin && options.touchPoint) {
+    const o = options.touchOrigin,
+      p = options.touchPoint;
+    const dx = p.x - o.x,
+      dy = p.y - o.y,
+      length = Math.hypot(dx, dy),
+      ratio = Math.min(1, 36 / Math.max(1, length));
+    circle(o.x, o.y, 44, "#b6ff6818");
+    ctx.strokeStyle = "#b6ff6866";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(o.x, o.y, 44, 0, Math.PI * 2);
+    ctx.stroke();
+    circle(o.x + dx * ratio, o.y + dy * ratio, 16, "#c4ff8b88");
   }
 }

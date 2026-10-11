@@ -21,6 +21,11 @@
   async function enter() {
     if (active()) return;
     try {
+      if (
+        arena.getBoundingClientRect().width <= 700 ||
+        matchMedia("(pointer: coarse)").matches
+      )
+        throw new Error("Use mobile arena");
       if (!arena.requestFullscreen) throw new Error("Fullscreen unavailable");
       await arena.requestFullscreen();
     } catch {

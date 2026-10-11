@@ -54,6 +54,20 @@ export function drawBackdrop(ctx, width, height) {
       b.fill();
     }
     b.globalAlpha = 1;
+    b.strokeStyle = "#24463288";
+    b.lineWidth = 0.5;
+    for (let x = 0; x < width; x += 42) {
+      b.beginPath();
+      b.moveTo(x, 0);
+      b.lineTo(x, height);
+      b.stroke();
+    }
+    for (let y = 0; y < height; y += 42) {
+      b.beginPath();
+      b.moveTo(0, y);
+      b.lineTo(width, y);
+      b.stroke();
+    }
   }
   ctx.drawImage(cached, 0, 0, width, height);
 }

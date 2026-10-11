@@ -1,3 +1,4 @@
+import { camera, screenPoint, touchTarget, pixelRatio } from "./viewport.mjs";
 import { audioUI, sound } from "./audio.js";
 import { socialUI } from "./social.js";
 import { profileUI } from "./profile.js";
@@ -276,6 +277,13 @@ text.ru.tokens =
   "Игра бесплатна. Чат — после подписи кошельком. Постоянные украшения оплачиваются в SOL, CICADAFARM или ROBOTCYB. Нет наград токенами или платного преимущества.";
 text["zh-CN"].tokens =
   "免费游戏。钱包签名后可发言，可用 SOL、CICADAFARM 或 ROBOTCYB 购买永久装饰，无代币奖励或付费游戏优势。";
+for (const [language, help] of Object.entries({
+  en: "On touch screens: drag anywhere to steer; release to stop. The small map points to safe hives.",
+  ru: "На телефоне: тяни пальцем в любом месте, чтобы двигаться; отпусти для остановки. Мини-карта показывает безопасные ульи.",
+  "zh-CN":
+    "触屏操作：在任意位置拖动来控制方向，松开即可停止。小地图显示安全蜂箱。",
+}))
+  text[language].instructions += " " + help;
 const $ = (id) => document.getElementById(id),
   canvas = $("world"),
   ctx = canvas.getContext("2d"),
@@ -308,6 +316,8 @@ let w = 1000,
   session = null,
   lastSend = 0,
   snapshot = null,
+  previousSnapshot = null,
+  snapshotAt = 0,
   error = null;
 try {
   session = sessionStorage.getItem("swarmSession");
@@ -321,7 +331,9 @@ if (!/^[a-f0-9-]{36}$/.test(session || "")) {
 const profile = profileUI();
 audioUI();
 const social = socialUI(() => socket);
-let lastRespawn = 0;
+let lastRespawn = 0,
+  boardAt = 0,
+  profileLocked = null;
 const room = new URLSearchParams(location.search).get("room");
 if (/^(?:[1-9]|1[0-9]|20)$/.test(room || "")) $("room").value = room;
 function translate() {
@@ -369,7 +381,10 @@ function hud() {
           : t("hint");
   $("pause").disabled = state !== "running";
   $("room").disabled = state === "running" || state === "connecting";
-  profile.lock($("room").disabled);
+  if (profileLocked !== $("room").disabled) {
+    profileLocked = $("room").disabled;
+    profile.lock(profileLocked);
+  }
 }
 function join() {
   if (socket) socket.close();
@@ -421,6 +436,8 @@ function join() {
     }
     if (data.type === "world") {
       const previous = snapshot?.players.find((p) => p.id === identity);
+      previousSnapshot = snapshot;
+      snapshotAt = performance.now();
       snapshot = data;
       elapsed = data.elapsed;
       sharedTotal = data.total;
@@ -446,24 +463,10 @@ function join() {
           $("status").textContent = t("respawn");
         }
       }
-      resources = data.resources.map((p) => ({
-        ...p,
-        x: (p.x * w) / (snapshot?.width || 1000),
-        y: (p.y * h) / (snapshot?.height || 540),
-      }));
-      thorns = data.thorns.map((p) => ({
-        ...p,
-        x: (p.x * w) / (snapshot?.width || 1000),
-        y: (p.y * h) / (snapshot?.height || 540),
-      }));
-      bots = data.players
-        .filter((p) => p.id !== identity)
-        .map((p) => ({
-          ...p,
-          x: (p.x * w) / (snapshot?.width || 1000),
-          y: (p.y * h) / (snapshot?.height || 540),
-        }));
-      renderBoard(data.players);
+      if (performance.now() - boardAt > 1000) {
+        renderBoard(data.players);
+        boardAt = performance.now();
+      }
       hud();
     }
   };
@@ -534,24 +537,69 @@ $("invite").onclick = async () => {
     $("status").textContent = url.href;
   }
 };
+let touchOrigin = null,
+  touchPoint = null,
+  activePointer = null;
 function pointer(e) {
   const r = canvas.getBoundingClientRect();
-  target = {
-    x: ((e.clientX - r.left) * w) / r.width,
-    y: ((e.clientY - r.top) * h) / r.height,
+  const point = { x: e.clientX - r.left, y: e.clientY - r.top };
+  const mine = snapshot?.players.find((p) => p.id === identity) || {
+    x: 500,
+    y: 270,
   };
+  const mapW = snapshot?.width || 1000,
+    mapH = snapshot?.height || 540;
+  const view = camera(w, h, mapW, mapH, mine);
+  if (e.pointerType && e.pointerType !== "mouse") touchPoint = point;
+  const q =
+    touchOrigin && e.pointerType && e.pointerType !== "mouse"
+      ? touchTarget(mine, touchOrigin, point)
+      : screenPoint(view, point.x, point.y);
+  target = q && { x: (q.x * w) / mapW, y: (q.y * h) / mapH };
 }
 canvas.addEventListener("pointerdown", (e) => {
+  if (activePointer !== null) return;
+  activePointer = e.pointerId;
   canvas.setPointerCapture(e.pointerId);
+  if (e.pointerType && e.pointerType !== "mouse") {
+    const r = canvas.getBoundingClientRect();
+    touchOrigin = { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
   pointer(e);
 });
 canvas.addEventListener("pointermove", (e) => {
-  if (e.pointerType === "mouse" || e.buttons) pointer(e);
+  if (e.pointerType === "mouse" || e.pointerId === activePointer) pointer(e);
 });
-canvas.addEventListener("pointerup", (e) => {
-  if (e.pointerType !== "mouse") target = null;
+
+function refreshTouch() {
+  if (!touchOrigin || !touchPoint) return;
+  const mine = snapshot?.players.find((p) => p.id === identity);
+  if (!mine) return;
+  const q = touchTarget(mine, touchOrigin, touchPoint);
+  target = q && {
+    x: (q.x * w) / snapshot.width,
+    y: (q.y * h) / snapshot.height,
+  };
+}
+function releasePointer(e) {
+  if (e.pointerId !== activePointer) return;
+  activePointer = null;
+  touchOrigin = touchPoint = null;
+  if (e.pointerType && e.pointerType !== "mouse") target = null;
+}
+canvas.addEventListener("pointerup", releasePointer);
+canvas.addEventListener("pointercancel", releasePointer);
+canvas.addEventListener("lostpointercapture", releasePointer);
+window.addEventListener("blur", () => {
+  touchOrigin = touchPoint = null;
+  activePointer = null;
 });
-canvas.addEventListener("pointercancel", () => (target = null));
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    touchOrigin = touchPoint = null;
+    activePointer = null;
+  }
+});
 window.addEventListener("keydown", (e) => {
   if (e.target.closest("select,button,a,input,textarea")) return;
   if (
@@ -587,19 +635,37 @@ function resize() {
   const r = canvas.getBoundingClientRect();
   w = r.width;
   h = r.height;
-  dpr = Math.min(devicePixelRatio || 1, 1.5);
+  dpr = pixelRatio(w, h, devicePixelRatio);
   canvas.width = Math.round(w * dpr);
   canvas.height = Math.round(h * dpr);
   target = null;
 }
 new ResizeObserver(resize).observe(canvas);
 function draw(now) {
+  const alpha = Math.min(1, Math.max(0, (now - snapshotAt) / 100));
+  const rendered = snapshot && {
+    ...snapshot,
+    players: snapshot.players.map((p) => {
+      const before = previousSnapshot?.players.find((q) => q.id === p.id);
+      if (
+        !before ||
+        before.respawns !== p.respawns ||
+        Math.hypot(before.x - p.x, before.y - p.y) > 80
+      )
+        return p;
+      return {
+        ...p,
+        x: before.x + (p.x - before.x) * alpha,
+        y: before.y + (p.y - before.y) * alpha,
+      };
+    }),
+  };
   drawScene(
     ctx,
     w,
     h,
     dpr,
-    snapshot || { players: [], resources: [], thorns: [], elapsed: 0 },
+    rendered || { players: [], resources: [], thorns: [], elapsed: 0 },
     identity,
     now,
     {
@@ -615,10 +681,24 @@ function draw(now) {
             }
           : null,
       safeLabel: t("safe"),
+      touchOrigin,
+      touchPoint,
     },
   );
 }
+let drawAt = 0,
+  idleDrawAt = 0;
 function loop(now) {
+  if (document.hidden) {
+    requestAnimationFrame(loop);
+    return;
+  }
+  if (now - drawAt < 1000 / 60 - 1) {
+    requestAnimationFrame(loop);
+    return;
+  }
+  drawAt = now;
+  refreshTouch();
   if (
     state === "running" &&
     !document.hidden &&
@@ -648,7 +728,10 @@ function loop(now) {
     trail.unshift({ x: player.x, y: player.y });
     if (trail.length > 130) trail.pop();
   }
-  draw(now);
+  if (state === "running" || now - idleDrawAt > 250) {
+    draw(now);
+    idleDrawAt = now;
+  }
   requestAnimationFrame(loop);
 }
 translate();
