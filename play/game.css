@@ -754,7 +754,7 @@ input:focus-visible {
 .arena.expanded {
   padding: 0;
 }
-@media (pointer: coarse), (max-width: 700px) {
+@media (pointer: coarse), (max-width: 1024px) {
   button,
   select,
   input {
